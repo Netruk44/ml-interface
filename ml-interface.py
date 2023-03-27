@@ -26,8 +26,9 @@ def main():
     # First, check to make sure the specified model is valid
     try:
         model_module = __import__("models." + model_name, fromlist=["model"])
-    except ImportError:
+    except ImportError as e:
         print("Error: model {} not found".format(model_name))
+        print(e)
         sys.exit(1)
 
     # Create an instance of the model
