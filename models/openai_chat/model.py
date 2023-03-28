@@ -5,12 +5,13 @@ Uses OpenAI's GPT Chat API to generate a response to the input json file.
 
 # Requirements:
 # pip install openai
+# os.environ["OPENAI_API_KEY"] needs to be set to your OpenAI API key
 
 import openai
 import json
+import os
 
-# TODO: Add your OpenAI API key here
-OPENAI_API_KEY = ""
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 class Model:
   def __init__(self,
