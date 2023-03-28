@@ -3,6 +3,8 @@ dummy_readjson model
 This model reads the input json file and returns the contents.
 '''
 
+# Requirements: None
+
 class Model:
     def __init__(self):
         pass

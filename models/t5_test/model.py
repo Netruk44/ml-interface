@@ -5,6 +5,10 @@ The model itself is one of the defaults provided by the transformers library.
 It will likely have poor performance, but works as a test.
 '''
 
+# Requirements:
+#   pip install transformers   |   conda install -c conda-forge transformers
+#   pip install sentencepiece  |   conda install -c conda-forge sentencepiece
+
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 
 class Model:
