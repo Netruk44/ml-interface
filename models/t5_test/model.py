@@ -9,7 +9,7 @@ from transformers import T5Tokenizer, T5ForConditionalGeneration
 
 class Model:
   def __init__(self):
-    self.tokenizer = T5Tokenizer.from_pretrained('t5-small')
+    self.tokenizer = T5Tokenizer.from_pretrained('t5-small', model_max_length=92)
     self.model = T5ForConditionalGeneration.from_pretrained('t5-small')
   
   def predict(self, input_json):
