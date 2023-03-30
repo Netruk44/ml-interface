@@ -44,7 +44,7 @@ If you don't have a clone of nixpkgs, and don't want to bother, you can use the 
 
 > **Note**: Be warned that it will take a few minutes to download the entire repository archive. And you'll have to redownload the entire thing every time I push an update.
 > 
-> It would be very much worth your time to instead use git and clone it 😊.
+> It would probably be worth your time to instead use git and clone nixpkgs if you ever decide to rebuild the mod.
 
 **With flakes enabled**:
 ```bash
