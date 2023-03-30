@@ -9,7 +9,7 @@ Neither way is guaranteed to work, since things are still in early development. 
 
 The mod is currently only tested on Mac, with Linux support assumed. Windows currently is not supported at all.
 
-> Windows support wouldn't be too hard to add (most of the heavy lifting is done by Python and Conda), but there's some `.sh` scripts that are run as part of the text-generation process that would have to be replaced with batch scripts.
+> **Note**: Windows support wouldn't be too hard to add (most of the heavy lifting is done by Python and Conda), but there's some `.sh` scripts that are run as part of the text-generation process that would have to be replaced with batch scripts.
 
 ## Prerequisites
 Regardless of which option you go with, you need to set up the ML environment first. While running the game,  [miniconda](https://docs.conda.io/en/latest/miniconda.html) (or similar) must be available for the game to run. The game uses `conda run` to run the models.
