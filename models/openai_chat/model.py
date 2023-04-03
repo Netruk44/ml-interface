@@ -34,8 +34,13 @@ Respond in-character using descriptive language. Reply with only your dialogue, 
 
 You are {input_json["actor"]}, a non-player character in Morrowind.
 
-The player approaches your character and says, "{input_json["prompt"]}"
+The player greets your character.
 """
+
+    existing_messages = [{
+      "role": "assistant" if message["who"] == "actor" else "user",
+      "content": message["text"]
+    } for message in input_json["history"]]
     
     response = openai.ChatCompletion.create(
       model=self.model_name,
@@ -43,6 +48,8 @@ The player approaches your character and says, "{input_json["prompt"]}"
       messages = [
         {"role": "system", "content": "You are a role-playing game character in the world of The Elder Scrolls III: Morrowind."},
         {"role": "user", "content": setup_prompt},
+        *existing_messages,
+        {"role": "user", "content": input_json["prompt"]},
       ])
 
     return response.choices[0]['message']['content']
