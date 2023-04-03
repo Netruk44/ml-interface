@@ -25,7 +25,11 @@ This environment will be used by the mod to generate text. Once your environment
 ## Option 1 - Nix (Easiest)
 Nix itself isn't the easiest thing to use, but I have commands for you to use below that should work for anybody, if you can get Nix installed.
 
+### With Local nixpkgs Clone
+
 If you already have a clone of nixpkgs available locally, add my [GitHub fork](https://github.com/Netruk44/nixpkgs): `https://github.com/Netruk44/nixpkgs`, and checkout the branch `openmw-ipc-mod`, then build the package `openmw-mod-something-else`.
+
+> **Important**: If you want to use the OpenAI Chat Completion API, you'll need to put your own API key into the nix file located at `pkgs/games/openmw/mods/something-else.nix`. Look for the line that has `export OPENAI_API_KEY=""` and add your key between the quotes.
 
 For example:
 ```bash
@@ -37,9 +41,15 @@ cd /path/to/your/nixpkgs
 git remote add netruk44 https://github.com/Netruk44/nixpkgs
 git fetch netruk44
 git checkout -b openmw-ipc-mod netruk44/openmw-ipc-mod
+nano pkgs/games/openmw/mods/something-else.nix
+  # Edit the line that says `export OPENAI_API_KEY=""` and add your key between the quotes
 nix-build . -A openmw-mod-something-else
 ```
 
+Once the command is complete, you should have a usable build of the game in the `result` folder. You can run it by running the `openmw` binary in the `bin` folder on Linux, or by using `open result/OpenMW.App` on Mac.
+
+
+### Without Local nixpkgs Clone
 If you don't have a clone of nixpkgs, and don't want to bother, you can use the following command to just build it without making a clone of nixpkgs:
 
 > **Note**: Be warned that it will take a few minutes to download the entire repository archive. And you'll have to redownload the entire thing every time I push an update.
@@ -55,6 +65,10 @@ nix build "git+https://github.com/Netruk44/nixpkgs?ref=openmw-ipc-mod"#openmw-mo
 ```bash
 nix-build "https://github.com/Netruk44/nixpkgs/archive/openmw-ipc-mod.tar.gz" -A openmw-mod-something-else
 ```
+
+> **Note**: It's harder to use the Open AI Chat Completion API if you use this method, since you won't be able to set your API key.
+> 
+> If you copy the result out of the nix store, you can edit the `custom_answer` script in the binary folder to set your key.
 
 Once the command is complete, you should have a usable build of the game in the `result` folder. You can run it by running the `openmw` binary in the `bin` folder on Linux, or by using `open result/OpenMW.App` on Mac.
 
@@ -75,7 +89,8 @@ Then setup the following repositories...
   * Add my fork as a remote: `https://gitlab.com/Netruk44/openmw.git`
   * Checkout the branch: `something-else-mod`
   * Build it: `make`
-  * Create a shell script in the output binary folder next to `openmw` called `custom_answer` with just one line:
-    * `$ML_INTERFACE_PATH/ml-interface.sh "$@"`
+  * Create a shell script in the output binary folder next to `openmw` called `custom_answer` with one or two lines:
+    * If you plan on using the openai chat completion API, you'll need to set your key: `export OPENAI_API_KEY="sk-yourkeyhere"`
+    * Execute the script: `$ML_INTERFACE_PATH/ml-interface.sh "$@"`
 
 After that, you should be able to see and use the new `Something Else...` button in the dialogue menu.
