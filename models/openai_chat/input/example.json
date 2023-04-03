@@ -1,0 +1,14 @@
+{
+  "prompt": "Have you told them?",
+  "actor": "eldafire",
+  "history": [
+    {
+      "text": "I haven't seen your Argonian face before. Would you like a little advice? Or are you looking for someone in particular?",
+      "who": "actor"
+    },
+    {
+      "text": "You look like you can take care of yourself. Then why don't you do something about those smugglers in Addamasartus cave? It's right over there near the silt strider port. Yet these guards! Look at them. Just strutting around. Someone must have paid them to ignore the smuggling going on here.",
+      "who": "actor"
+    }
+  ]
+}
