@@ -1,0 +1,18 @@
+{
+  "prompt": "Which do you prefer?",
+  "actor": "vodunius nuccius",
+  "history": [
+    {
+      "text": "Yes? What do you want? If you're looking to get out of Seyda Neen, I'll be happy to give you a little advice.",
+      "who": "actor"
+    },
+    {
+      "text": "little advice",
+      "who": "player"
+    },
+    {
+      "text": "New here? Take the silt strider to Vivec or Balmora. Fast and cheap. No trouble with wild animals. And smugglers. And bandits. And outlaws. Go see Darvame Hleran over at the strider port, over the bridge and east along the water. And tell her Vodunius Nuccius sent you.",
+      "who": "actor"
+    }
+  ]
+}
