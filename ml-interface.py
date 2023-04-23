@@ -19,6 +19,8 @@ def main():
         sys.exit(1)
 
     model_name = sys.argv[1]
+    # Override hack
+    #model_name = "dummy_readjson"
     input_json = sys.argv[2]
 
     # Import the model
