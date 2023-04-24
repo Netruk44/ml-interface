@@ -107,14 +107,14 @@ class Model:
     # Optional interesting factoid about the player the actor may know about.
     optional_player_factoid_string = ''
 
-    # Is the player famous enough to be recognized by this actor?
-    # Generate a number 0-150, if the number is less than the player's reputation, then the actor knows the player.
-    # Note: This will result in the ai model only sometimes knowing about the player, since it rolls separately for each message.
     player_reputation = int(input_json["player_reputation"])
     player_bounty = int(input_json["player_bounty"])
     #player_is_werewolf = int(input_json["player_is_werewolf"])
     #player_werewolf_kills = int(input_json["player_werewolf_kills"])
 
+    # Is the player famous enough to be recognized by this actor?
+    # Generate a number 0-150, if the number is less than the player's reputation, then the actor knows the player.
+    # Note: This will result in the ai model only sometimes knowing about the player, since it rolls separately for each message.
     if random.randint(0, 150) < player_reputation:
       if player_reputation < 10:
         optional_player_factoid_string = " You think you might have heard of the player's name before, but you don't know much about them."
