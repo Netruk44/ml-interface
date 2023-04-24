@@ -78,7 +78,7 @@ class Model:
         elif player_faction_rank < 7:
           optional_player_faction_string += ' The player is a mid-ranking member of their faction. Respect should be shown if you are a subordinate member of the same faction.'
         else:
-          optional_player_faction_string += ' The player is a well-known and respected member of their faction. Their name is fairly well-known throughout the land.'
+          optional_player_faction_string += ' The player is a high-ranking member of their faction. You should show respect for their position.'
     
     # Optional interesting factoid about the actor
     optional_actor_factoid_string = ''
