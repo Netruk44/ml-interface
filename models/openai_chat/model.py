@@ -131,9 +131,9 @@ class Model:
       elif player_bounty < 1000:
         optional_player_factoid_string = " You've heard that the player has a bounty for something serious like assault or pickpocketing."
       elif player_bounty < 5000:
-        optional_player_factoid_string = " The player is a known criminal, likely a murderer. You know the guards are looking for them."
+        optional_player_factoid_string = " The player is a known criminal, likely a murderer. You know they are wanted by the authorities."
       else:
-        optional_player_factoid_string = " The player is a known serial-killer, the guards have made it known that the player should be fled from or killed on sight."
+        optional_player_factoid_string = " The player is a known serial-killer, authority has made it known that the player should be fled from or killed on sight."
 
     # The setup prompt for the first 'chat' message.
     setup_prompt = f"""
