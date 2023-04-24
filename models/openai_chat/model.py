@@ -63,6 +63,7 @@ class Model:
           player_faction = next(iter(input_json["player_factions"].keys()))
         else:
           # Otherwise for now, only care about the highest rank faction.
+          # TODO: Prioritize the faction that the actor is a member of.
           # Order the keys by their value:
           sorted_factions = sorted(input_json["player_factions"], key=input_json["player_factions"].get, reverse=True)
           # Get the first key:
@@ -79,12 +80,32 @@ class Model:
         else:
           optional_player_faction_string += ' The player is a well-known and respected member of their faction. Their name is fairly well-known throughout the land.'
     
+    # Optional interesting factoid about the actor
+    optional_actor_factoid_string = ''
+
+    # Does the actor have a reputation?
+    # Reputation is a number from 0-150
+    # For the player, each increase comes from completing a quest for someone.
+    # NPCs have a predetermined reputation. Commoners are 0, guards are around 6.
+    actor_reputation = int(input_json["actor_reputation"])
+    if actor_reputation > 0:
+      if actor_reputation < 5:
+        optional_actor_factoid_string = " You're not very well-known. You've helped a few people in the past, but nobody really knows who you are."
+      elif actor_reputation < 10:
+        optional_actor_factoid_string = " You've helped a few people in the past, and people are starting to know who you are."
+      elif actor_reputation < 20:
+        optional_actor_factoid_string = " You've started to build a name for yourself. In certain circles, you're starting to become well-known."
+      elif actor_reputation < 50:
+        optional_actor_factoid_string = " People generally know who you are. You've had an impact on many people's lives."
+      elif actor_reputation < 100:
+        optional_actor_factoid_string = " You're a well-known and respected person. You've helped many people throughout your career, and they've talked about you a lot."
+      else:
+        optional_actor_factoid_string = " You're a legend. You've helped countless people throughout your lifespan, and as a result everybody knows your name."
+
     # Optional interesting factoid about the player the actor may know about.
     optional_player_factoid_string = ''
 
     # Is the player famous enough to be recognized by this actor?
-    # Reputation is a number from 0-150
-    # Each increase comes from completing a quest for someone.
     # Generate a number 0-150, if the number is less than the player's reputation, then the actor knows the player.
     # Note: This will result in the ai model only sometimes knowing about the player, since it rolls separately for each message.
     player_reputation = int(input_json["player_reputation"])
@@ -119,9 +140,9 @@ You are a role-playing game character in the world of The Elder Scrolls III: Mor
 Respond in-character using descriptive language. Reply with only your dialogue, no description of your actions should be mentioned.
 
 == Context ==
-You are a character named  "{input_json["actor"]}", you are a {input_json["actor_race"]} {input_json["actor_class"]}.{optional_actor_faction_string}
+You are a character named "{input_json["actor"]}", you are a {input_json["actor_race"]} {input_json["actor_class"]}.{optional_actor_faction_string}{optional_actor_factoid_string}
 
-The player is named "{input_json["player_name"]}", they are a {input_json["player_race"]} {input_json["player_class"]}.{optional_player_faction_string}
+The player is named "{input_json["player_name"]}", they are a {input_json["player_race"]} {input_json["player_class"]}.{optional_player_faction_string}{optional_player_factoid_string}
 
 The player greets your character.
 """
