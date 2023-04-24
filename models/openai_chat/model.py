@@ -14,7 +14,7 @@ import random
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
-# Instead of calling the api, return the input json as a string
+# Instead of calling the api, return the content that would have been sent to the api
 DEBUG = False
 
 class Model:
