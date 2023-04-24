@@ -44,7 +44,7 @@ class Model:
         elif rank < 7:
           optional_actor_faction_string += ' You are a mid-ranking member of your faction. You expect to be treated with respect.'
         else:
-          optional_actor_faction_string += ' You are a well-known and respected member of your faction. You are a leader and a role model to your peers.'
+          optional_actor_faction_string += ' You are a high-ranking, well-known and respected member of your faction. You are a leader and a role model to your peers.'
 
     # Player faction description string
     optional_player_faction_string = ''
