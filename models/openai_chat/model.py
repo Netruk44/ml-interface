@@ -86,21 +86,23 @@ class Model:
     # Does the actor have a reputation?
     # Reputation is a number from 0-150
     # For the player, each increase comes from completing a quest for someone.
-    # NPCs have a predetermined reputation. Commoners are 0, guards are around 6.
+    # NPCs have a predetermined reputation. Commoners are 0, guards are 6, Sellus Gravius is 12, etc.
     actor_reputation = int(input_json["actor_reputation"])
     if actor_reputation > 0:
       if actor_reputation < 5:
-        optional_actor_factoid_string = " You're not very well-known. You've helped a few people in the past, but nobody really knows who you are."
+        optional_actor_factoid_string = " You're not very well-known. You've done a little bit of work for a few people, but nobody really knows who you are."
       elif actor_reputation < 10:
-        optional_actor_factoid_string = " You've helped a few people in the past, and people are starting to know who you are."
+        optional_actor_factoid_string = " You've completed jobs for a few people in the past, and people are starting to know who you are."
       elif actor_reputation < 20:
-        optional_actor_factoid_string = " You've started to build a name for yourself. In certain circles, you're starting to become well-known."
+        optional_actor_factoid_string = " You've started to build a name for yourself. In certain circles, you're becoming well-known."
       elif actor_reputation < 50:
         optional_actor_factoid_string = " People generally know who you are. You've had an impact on many people's lives."
       elif actor_reputation < 100:
-        optional_actor_factoid_string = " You're a well-known and respected person. You've helped many people throughout your career, and they've talked about you a lot."
+        optional_actor_factoid_string = " You're a well-known and respected person. You've completed many tasks for a lot of people throughout your career, and they've talked about you a lot."
       else:
-        optional_actor_factoid_string = " You're a legend. You've helped countless people throughout your lifespan, and as a result everybody knows your name."
+        optional_actor_factoid_string = " You're a legend. You've impacted countless people throughout your lifespan, and as a result everybody knows your name."
+    else:
+      optional_actor_factoid_string = " The character you're playing as doesn't have any reputation. Feel free to make up a simple backstory for them."
 
     # Optional interesting factoid about the player the actor may know about.
     optional_player_factoid_string = ''
@@ -144,7 +146,7 @@ You are a character named "{input_json["actor"]}", you are a {input_json["actor_
 
 The player is named "{input_json["player_name"]}", they are a {input_json["player_race"]} {input_json["player_class"]}.{optional_player_faction_string}{optional_player_factoid_string}
 
-The player greets your character.
+You and the player are located in "{input_json["location"]}". The player greets your character.
 """
 
     # The messages from the in-game conversation.
