@@ -1,9 +1,30 @@
 {
-  "prompt": "Which do you prefer?",
-  "actor": "vodunius nuccius",
+  "prompt": "Which is your favorite?",
+  "actor": "Vodunius Nuccius",
+  "actor_class": "Commoner",
+  "actor_race": "Imperial",
+  "actor_faction": "",
+  "actor_faction_rank": "-1",
+  "actor_disposition": "40",
+  "actor_reputation": "0",
+  "player_name": "Hamvir",
+  "player_class": "barbarian",
+  "player_race": "nord",
+  "player_reputation": "0",
+  "player_bounty": "0",
+  "player_factions": {},
+  "location": "Seyda Neen",
   "history": [
     {
       "text": "Yes? What do you want? If you're looking to get out of Seyda Neen, I'll be happy to give you a little advice.",
+      "who": "actor"
+    },
+    {
+      "text": "specific place",
+      "who": "player"
+    },
+    {
+      "text": "Not much here. Arrille's Tradehouse, the Census and Excise offices -- that's the Coast Guard, too -- and a lighthouse. And that's it. Silt strider service goes to Vivec, Balmora, Gnisis, and Suran. The road goes north past Pelagiad to Balmora, and east to Vivec, and southeast to Ebonheart.",
       "who": "actor"
     },
     {

@@ -1,10 +1,27 @@
 {
   "prompt": "Have you told them?",
-  "actor": "eldafire",
+  "actor": "Eldafire",
+  "actor_class": "Commoner",
+  "actor_race": "High Elf",
+  "actor_faction": "",
+  "actor_faction_rank": "-1",
+  "actor_disposition": "40",
+  "actor_reputation": "0",
+  "player_name": "Hamvir",
+  "player_class": "barbarian",
+  "player_race": "nord",
+  "player_reputation": "0",
+  "player_bounty": "0",
+  "player_factions": {},
+  "location": "Seyda Neen",
   "history": [
     {
-      "text": "I haven't seen your Argonian face before. Would you like a little advice? Or are you looking for someone in particular?",
+      "text": "I haven't seen your Nord face before. Would you like a little advice? Or are you looking for someone in particular?",
       "who": "actor"
+    },
+    {
+      "text": "little advice",
+      "who": "player"
     },
     {
       "text": "You look like you can take care of yourself. Then why don't you do something about those smugglers in Addamasartus cave? It's right over there near the silt strider port. Yet these guards! Look at them. Just strutting around. Someone must have paid them to ignore the smuggling going on here.",
