@@ -66,9 +66,9 @@ nix build "git+https://github.com/Netruk44/nixpkgs?ref=openmw-ipc-mod"#openmw-mo
 nix-build "https://github.com/Netruk44/nixpkgs/archive/openmw-ipc-mod.tar.gz" -A openmw-mod-something-else
 ```
 
-> **Note**: It's harder to use the Open AI Chat Completion API if you use this method, since you won't be able to set your API key.
+> **Note**: It's harder to use the Open AI Chat Completion API if you use this method, since you won't be able to set your API key in the nix files directly.
 > 
-> If you copy the result out of the nix store, you can edit the `custom_answer` script in the binary folder to set your key.
+> If you `copy` the result out of the nix store to somewhere else on disk, you can modify the `custom_answer` script in the binary output folder, and set your key that way.
 
 Once the command is complete, you should have a usable build of the game in the `result` folder. You can run it by running the `openmw` binary in the `bin` folder on Linux, or by using `open result/OpenMW.App` on Mac.
 
