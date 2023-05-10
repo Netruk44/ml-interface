@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "openmw_openaichat_queue2cosmos": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7069",
+      "launchBrowser": false
+    }
+  }
+}
