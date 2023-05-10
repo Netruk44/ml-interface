@@ -23,7 +23,8 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 DEBUG = False
 
 # Message tracing
-# Save input json, output json, and the response from the api to a directory.
+# Send input json, output json, and the response from the api to an Azure Storage Queue
+# Set this to your Azure Storage SAS connection string. Needs Queue Add permissions only.
 TRACING_ENDPOINT = os.environ.get("TRACING_ENDPOINT")
 
 TRACING = TRACING_ENDPOINT != ""
