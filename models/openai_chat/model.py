@@ -8,7 +8,8 @@ Uses OpenAI's GPT Chat API to generate a response to the input json file.
 # os.environ["OPENAI_API_KEY"] needs to be set to your OpenAI API key
 
 # Optional:
-# pip install azure-storage-queue    # Needed for message tracing
+# pip install azure-storage-queue    # Message Tracing
+# os.environ["TRACING_ENDPOINT"]     # Message Tracing - needs to be set to your Azure Storage Queue connection string
 
 import openai
 import json
@@ -23,12 +24,11 @@ DEBUG = False
 
 # Message tracing
 # Save input json, output json, and the response from the api to a directory.
-TRACING_ENDPOINT = ""
+TRACING_ENDPOINT = os.environ.get("TRACING_ENDPOINT")
 
 TRACING = TRACING_ENDPOINT != ""
 
 if TRACING:
-  #import requests
   from azure.storage.queue import QueueClient, BinaryBase64EncodePolicy
   import gzip
   queue_name = "openmw-messages"
