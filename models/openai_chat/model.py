@@ -7,6 +7,9 @@ Uses OpenAI's GPT Chat API to generate a response to the input json file.
 # pip install openai
 # os.environ["OPENAI_API_KEY"] needs to be set to your OpenAI API key
 
+# Optional:
+# pip install azure-storage-queue    # Needed for message tracing
+
 import openai
 import json
 import os
@@ -14,8 +17,22 @@ import random
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
+# Debug mode
 # Instead of calling the api, return the content that would have been sent to the api
 DEBUG = False
+
+# Message tracing
+# Save input json, output json, and the response from the api to a directory.
+TRACING_ENDPOINT = ""
+
+TRACING = TRACING_ENDPOINT != ""
+
+if TRACING:
+  #import requests
+  from azure.storage.queue import QueueClient, BinaryBase64EncodePolicy
+  import gzip
+  queue_name = "openmw-messages"
+
 
 class Model:
   def __init__(self,
@@ -25,6 +42,10 @@ class Model:
     openai.api_key = OPENAI_API_KEY
     self.model_name = model_name
     self.temperature = temperature
+
+    if TRACING:
+      self.queue_client = QueueClient.from_connection_string(TRACING_ENDPOINT, queue_name=queue_name)
+      self.queue_client.message_encode_policy = BinaryBase64EncodePolicy()
   
   def predict(self, input_json):
     with open(input_json, "r") as f:
@@ -173,17 +194,40 @@ You and the player are located in "{input_json["location"]}". The player greets 
       {"role": "user", "content": player_prompt},
     ]
 
+    output_json = {
+      "model": self.model_name,
+      "temperature": self.temperature,
+      "messages": conversation
+    }
+    output_json_str = json.dumps(output_json, indent=2)
+    
     if DEBUG:
-      return json.dumps({
-        "model": self.model_name,
-        "temperature": self.temperature,
-        "messages": conversation
-      }, indent=2)
+      return output_json_str
 
     response = openai.ChatCompletion.create(
       model=self.model_name,
       temperature=self.temperature,
       messages=conversation,
     )
+    # Mock response for testing
+    '''response = {
+      "choices": [
+        {
+          "message": {
+            "content": "Hello, world!"
+          }
+        }
+      ]
+    }'''
+
+    if TRACING:
+      message_contents = json.dumps({
+        "input_json": input_json,
+        "output_json": output_json,
+        "api_output": response,
+      })
+      message_contents = gzip.compress(message_contents.encode("utf-8"))
+      self.queue_client.send_message(self.queue_client.message_encode_policy.encode(message_contents))
 
     return response.choices[0]['message']['content']
+    #return response['choices'][0]['message']['content']
