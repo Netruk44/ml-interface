@@ -9,7 +9,7 @@ Uses OpenAI's GPT Chat API to generate a response to the input json file.
 
 # Optional:
 # pip install azure-storage-queue    # Message Tracing
-# os.environ["TRACING_ENDPOINT"]     # Message Tracing - needs to be set to your Azure Storage Queue SAS token
+# os.environ["TRACING_ENDPOINT"]     # Message Tracing - needs to be set to your Azure Storage Queue Connection String
 
 import openai
 import json
@@ -24,7 +24,7 @@ DEBUG = False
 
 # Message tracing
 # Send input json, output json, and the response from the api to an Azure Storage Queue
-# Set this to your Azure Storage SAS, needs Queue Add permissions only.
+# Set this to your Azure Storage Connection String, needs Queue Add permissions only.
 # If you would like to help me out with generating data, send me an e-mail at somethingelse@danieltperry.me and I can give you my SAS token.
 TRACING_ENDPOINT = os.environ.get("TRACING_ENDPOINT")
 
@@ -39,7 +39,7 @@ if TRACING:
 class Model:
   def __init__(self,
     model_name = "gpt-3.5-turbo",
-    temperature = 0.7,
+    temperature = 0.85, # Default: 0.7, which makes most NPCs sound like the same person with a different background.
     ):
     openai.api_key = OPENAI_API_KEY
     self.model_name = model_name
@@ -58,7 +58,7 @@ class Model:
     optional_actor_faction_string = ''
 
     if input_json["actor_faction"]:
-      optional_actor_faction_string = f' You are a member of the {input_json["actor_faction"]} faction.'
+      optional_actor_faction_string = f' You are a member of the "{input_json["actor_faction"]}".'
 
       rank = int(input_json["actor_faction_rank"])
       if rank > -1:
@@ -92,9 +92,9 @@ class Model:
           # Get the first key:
           player_faction = sorted_factions[0]
       
-        player_faction_rank = input_json["player_factions"][player_faction]
+        player_faction_rank = int(input_json["player_factions"][player_faction])
 
-        optional_player_faction_string = f' The player is a member of the {player_faction} faction.'
+        optional_player_faction_string = f' The player is a member of the "{player_faction}".'
 
         if player_faction_rank < 4:
           optional_player_faction_string += ' The player is a low-ranking member of their faction.'
@@ -150,22 +150,28 @@ class Model:
     # Does the player have a bounty?
     elif player_bounty > 0 and random.randint(0, 1000) < player_bounty:
       if player_bounty < 50:
-        optional_player_factoid_string = " You've heard that the player has a small bounty for something minor like trespassing."
+        optional_player_factoid_string = f" There's a rumor that someone named \"{input_json['player_name']}\" has a small bounty for something minor like trespassing."
       elif player_bounty < 1000:
-        optional_player_factoid_string = " You've heard that the player has a bounty for something serious like assault or pickpocketing."
+        optional_player_factoid_string = f" {input_json['player_name']} has a bounty for something serious like assault or pickpocketing."
       elif player_bounty < 5000:
-        optional_player_factoid_string = " The player is a known criminal, likely a murderer. You know they are wanted by the authorities."
+        optional_player_factoid_string = f" {input_json['player_name']} is a known criminal, likely a murderer. You know they are wanted by the authorities."
       else:
-        optional_player_factoid_string = " The player is a known serial-killer, authority has made it known that the player should be fled from or killed on sight."
+        optional_player_factoid_string = f" {input_json['player_name']} is a known serial-killer, authority has made it known that the player should be fled from or killed on sight."
+
+    # Touch-up the actor's class to rephrase '<class> Service' to something that ChatGPT understands better
+    actor_class = input_json['actor_class']
+    if actor_class.endswith(' Service'):
+        actor_class = actor_class[:-len(' Service')]
+        actor_class = f'{actor_class} who offers their services to others'
 
     # The setup prompt for the first 'chat' message.
     setup_prompt = f"""
 You are a role-playing game character in the world of The Elder Scrolls III: Morrowind.
 
-Respond in-character using descriptive language. Reply with only your dialogue, no description of your actions should be mentioned.
+Respond in-character using descriptive language. Don't use quotation around your entire response, it's understood that your response is dialogue.
 
 == Context ==
-You are a character named "{input_json["actor"]}", you are a {input_json["actor_race"]} {input_json["actor_class"]}.{optional_actor_faction_string}{optional_actor_factoid_string}
+You are a character named "{input_json["actor"]}", you are a {input_json["actor_race"]} {actor_class}.{optional_actor_faction_string}{optional_actor_factoid_string}
 
 The player is named "{input_json["player_name"]}", they are a {input_json["player_race"]} {input_json["player_class"]}.{optional_player_faction_string}{optional_player_factoid_string}
 
