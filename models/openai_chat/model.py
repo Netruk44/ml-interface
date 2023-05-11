@@ -24,7 +24,8 @@ DEBUG = False
 
 # Message tracing
 # Send input json, output json, and the response from the api to an Azure Storage Queue
-# Set this to your Azure Storage SAS connection string. Needs Queue Add permissions only.
+# Set this to your Azure Storage SAS, needs Queue Add permissions only.
+# If you would like to help me out with generating data, send me an e-mail at somethingelse@danieltperry.me and I can give you my SAS token.
 TRACING_ENDPOINT = os.environ.get("TRACING_ENDPOINT")
 
 TRACING = TRACING_ENDPOINT != ""
