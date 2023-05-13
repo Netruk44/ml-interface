@@ -129,6 +129,7 @@ class Model:
       optional_actor_factoid_string = " The character you're playing as doesn't have any reputation. Feel free to make up a simple backstory for them."
 
     # Description of the actor's state (health, magic, fatigue)
+    actor_level = int(input_json["actor_level"])
     actor_current_health = float(input_json["actor_current_health"])
     actor_current_magicka = float(input_json["actor_current_magicka"])
     actor_current_fatigue = float(input_json["actor_current_fatigue"])
@@ -167,6 +168,11 @@ class Model:
 
       actor_state_string = f'You are {actor_state_string}.'
 
+    if actor_level < 5:
+      actor_state_string += ' You are inexperienced when it comes to combat.'
+    elif actor_level > 20:
+      actor_state_string += ' You are a veteran when it comes to combat.'
+
     # Optional interesting factoid about the player the actor may know about.
     optional_player_factoid_string = ''
 
@@ -199,6 +205,7 @@ class Model:
         optional_player_factoid_string = f" {input_json['player_name']} is a known serial-killer, authority has made it known that the player should be fled from or killed on sight."
     
     # Description of player's state
+    player_level = int(input_json["player_level"])
     player_current_health = float(input_json["player_current_health"])
     player_current_magicka = float(input_json["player_current_magicka"])
     player_current_fatigue = float(input_json["player_current_fatigue"])
@@ -226,7 +233,7 @@ class Model:
       if player_magicka_percentage < 0.5:
         if player_state_string != '':
           player_state_string += ', '
-        player_state_string += 'tired from magicka use'
+        player_state_string += 'drained from magicka use'
       if player_fatigue_percentage < 0.5:
         if player_state_string != '':
           player_state_string += ', and '
@@ -235,7 +242,12 @@ class Model:
         else:
           player_state_string += 'slightly worn-out, breathing hard'
       
-      player_state_string = f'The player looks {player_state_string}.'
+      player_state_string = f'The player seems to be {player_state_string}.'
+    
+    if player_level < 5:
+      player_state_string += ' The player looks inexperienced and fresh-faced.'
+    elif player_level > 20:
+      player_state_string += ' The player looks like a veteran, with many scars and a hardened expression.'
 
     # Describe the player's relative strength (using HP for reference)
     relative_strength_string = 'In terms of physical strength, if you were to fight, '
@@ -264,7 +276,8 @@ class Model:
     elif strength_advantage == -2:
       relative_strength_string += 'you think you could easily overpower the player.'
     
-    if player_max_health < 100.0 and actor_max_health < 100.0 and strength_advantage != 0:
+    both_are_physically_weak = player_max_health < 100.0 and actor_max_health < 100.0 and strength_advantage != 0
+    if both_are_physically_weak:
       relative_strength_string += " But neither of you look very strong."
     
     # Describe the player's relative magical strength
@@ -283,7 +296,7 @@ class Model:
       # The player is better at magic and the actor is better at strength or vice versa
       relative_magic_string = 'However, in terms of magical strength, '
     else:
-      # Either the player or actor is better, or they're both the same.
+      # Either the player or actor is always better, or they're both the same.
       relative_magic_string = 'And in terms of magical strength, '
     
     #also_string = ' also' if ((magic_advantage > 0 and strength_advantage > 0) or (magic_advantage < 0 and strength_advantage < 0)) else ''
@@ -300,7 +313,12 @@ class Model:
       relative_magic_string += f'you think you could{also_string} easily overpower the player.'
     
     if player_max_magicka < 100.0 and actor_max_magicka < 100.0 and magic_advantage != 0:
-      relative_magic_string += " But neither of you are well-versed in magic."
+      # If everyone is bad at magic AND strength, add 'either' so the repetition doesn't sound as bad.
+      # e.g.
+      # "In terms of physical strength, you think the player would significantly overpower you. But neither of you look very strong. 
+      #  In terms of magical strength, you think you could easily overpower the player. But neither of you appears well-versed in magic, either."
+      either_string = ', either' if both_are_physically_weak else ''
+      relative_magic_string += f" But neither of you appears well-versed in magic{either_string}."
     
     # Touch-up the actor's class to rephrase '<class> Service' to something that ChatGPT understands better
     actor_class = input_json['actor_class']
@@ -312,7 +330,7 @@ class Model:
     setup_prompt = f"""
 You are a role-playing game character in the world of The Elder Scrolls III: Morrowind.
 
-Respond in-character using descriptive language. Don't use quotation around your entire response, it's understood that your response is dialogue.
+Respond in-character using descriptive language. Don't repeat exactly word-for-word the description below. Also, don't use quotation around your entire response, it's understood that your response is dialogue.
 
 == Context ==
 You are a character named "{input_json["actor"]}", you are a {input_json["actor_race"]} {actor_class}.{optional_actor_faction_string}{optional_actor_factoid_string}
