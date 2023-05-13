@@ -22,6 +22,9 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 # Instead of calling the api, return the content that would have been sent to the api
 DEBUG = False
 
+# Instead of calling the api, return a static response
+RETURN_MOCK_RESPONSE = False
+
 # Message tracing
 # Send input json, output json, and the response from the api to an Azure Storage Queue
 # Set this to your Azure Storage Connection String, needs Queue Add permissions only.
@@ -55,17 +58,37 @@ class Model:
       input_text = f.read()
     input_json = json.loads(input_text)
 
+    location = input_json["location"]
+
+    actor_name = input_json["actor"]
+    player_name = input_json["player_name"]
+
+    player_race = input_json["player_race"]
+    actor_race = input_json["actor_race"]
+
+    player_class = input_json["player_class"]
+    # Touch-up the actor's class to rephrase '<class> Service' to something that ChatGPT understands better
+    actor_class = input_json['actor_class']
+    if actor_class.endswith(' Service'):
+        actor_class = actor_class[:-len(' Service')]
+        actor_class = f'{actor_class} who offers their services to others'
+    
+    # Male/female text for actor and player
+    actor_malefemale = 'male' if int(input_json['actor_is_female']) == 0 else 'female'
+    player_malefemale = 'male' if int(input_json['player_is_female']) == 0 else 'female'
+
     # Actor faction description string
     optional_actor_faction_string = ''
+    actor_faction = input_json["actor_faction"]
+    actor_faction_rank = int(input_json["actor_faction_rank"])
 
-    if input_json["actor_faction"]:
-      optional_actor_faction_string = f' You are a member of the "{input_json["actor_faction"]}".'
+    if actor_faction != '':
+      optional_actor_faction_string = f' You are a member of the "{actor_faction}".'
 
-      rank = int(input_json["actor_faction_rank"])
-      if rank > -1:
-        if rank < 4:
+      if actor_faction_rank > -1:
+        if actor_faction_rank < 4:
           optional_actor_faction_string += ' You are a low-ranking member of your faction.'
-        elif rank < 7:
+        elif actor_faction_rank < 7:
           optional_actor_faction_string += ' You are a mid-ranking member of your faction. You expect to be treated with respect.'
         else:
           optional_actor_faction_string += ' You are a high-ranking, well-known and respected member of your faction. You are a leader and a role model to your peers.'
@@ -95,14 +118,16 @@ class Model:
       
         player_faction_rank = int(input_json["player_factions"][player_faction])
 
-        optional_player_faction_string = f' The player is a member of the "{player_faction}".'
+        optional_player_faction_string = f' {player_name} is a member of the "{player_faction}", and'
 
         if player_faction_rank < 4:
-          optional_player_faction_string += ' The player is a low-ranking member of their faction.'
+          optional_player_faction_string += ' they\'re a low-ranking member of their faction.'
         elif player_faction_rank < 7:
-          optional_player_faction_string += ' The player is a mid-ranking member of their faction. Respect should be shown if you are a subordinate member of the same faction.'
+          optional_player_faction_string += ' they\'re a a mid-ranking member of their faction.'
+          if actor_faction.casefold() == player_faction.casefold() and actor_faction_rank < player_faction_rank:
+            optional_player_faction_string += ' You should show respect for their position, as they outrank you.'
         else:
-          optional_player_faction_string += ' The player is a high-ranking member of their faction. You should show respect for their position.'
+          optional_player_faction_string += ' they\'re a a high-ranking member of their faction. You should show respect for their position.'
     
     # Optional interesting factoid about the actor
     optional_actor_factoid_string = ''
@@ -163,7 +188,7 @@ class Model:
         if actor_fatigue_percentage < 0.25:
           actor_state_string += 'completely exhausted'
         else:
-          actor_state_string += 'slightly worn-out'
+          actor_state_string += 'a little bit tired'
       
 
       actor_state_string = f'You are {actor_state_string}.'
@@ -186,23 +211,23 @@ class Model:
     # Note: This will result in the ai model only sometimes knowing about the player, since it rolls separately for each message.
     if random.randint(0, 150) < player_reputation:
       if player_reputation < 10:
-        optional_player_factoid_string = " You think you might have heard of the player's name before, but you don't know much about them."
+        optional_player_factoid_string = f" You think you might have heard of {player_name} before, but you don't know much about them."
       elif player_reputation < 50:
-        optional_player_factoid_string = " You've heard of the player's name before and have heard rumors about their previous deeds."
+        optional_player_factoid_string = f" You've heard of {player_name} before and have heard rumors about their previous deeds."
       elif player_reputation < 100:
-        optional_player_factoid_string = " The player is starting to become well-known throughout the land. Because they've helped so many people, they've been talked about a lot."
+        optional_player_factoid_string = f" {player_name} is starting to become well-known throughout the land. Because they've helped so many people, they've been talked about a lot."
       else:
-        optional_player_factoid_string = " The player is a household name. Most people know someone that the player has helped."
+        optional_player_factoid_string = f" {player_name} is a household name. Most people know someone that {player_name} has helped."
     # Does the player have a bounty?
     elif player_bounty > 0 and random.randint(0, 1000) < player_bounty:
       if player_bounty < 50:
-        optional_player_factoid_string = f" There's a rumor that someone named \"{input_json['player_name']}\" has a small bounty for something minor like trespassing."
+        optional_player_factoid_string = f" You've heard a rumor that someone named \"{player_name}\" has a small bounty for something minor like trespassing."
       elif player_bounty < 1000:
-        optional_player_factoid_string = f" {input_json['player_name']} has a bounty for something serious like assault or pickpocketing."
+        optional_player_factoid_string = f" {player_name} has a bounty for something serious like assault or pickpocketing."
       elif player_bounty < 5000:
-        optional_player_factoid_string = f" {input_json['player_name']} is a known criminal, likely a murderer. You know they are wanted by the authorities."
+        optional_player_factoid_string = f" {player_name} is a known criminal, likely a murderer. You know they are wanted by the authorities."
       else:
-        optional_player_factoid_string = f" {input_json['player_name']} is a known serial-killer, authority has made it known that the player should be fled from or killed on sight."
+        optional_player_factoid_string = f" {player_name} is a known serial-killer, authority has made it known that the player should be fled from or killed on sight."
     
     # Description of player's state
     player_level = int(input_json["player_level"])
@@ -221,7 +246,7 @@ class Model:
 
     if player_health_percentage > 0.5 and player_magicka_percentage > 0.5 and player_fatigue_percentage > 0.5:
       also_string = ' also' if actor_in_good_health else ''
-      player_state_string = f"The player is{also_string} in good health."
+      player_state_string = f"{player_name}{also_string} appears in good health."
     else: # At least one stat is below 50%
       player_in_good_health = False
       # Build up description, then wrap it in 'The player looks <description>.'
@@ -242,12 +267,14 @@ class Model:
         else:
           player_state_string += 'slightly worn-out, breathing hard'
       
-      player_state_string = f'The player seems to be {player_state_string}.'
+      player_state_string = f'{player_name} seems to be {player_state_string}.'
     
     if player_level < 5:
-      player_state_string += ' The player looks inexperienced and fresh-faced.'
+      also_string = ' also' if actor_level < 5 else ''
+      player_state_string += f' {player_name}{also_string} looks inexperienced and fresh-faced.'
     elif player_level > 20:
-      player_state_string += ' The player looks like a veteran, with many scars and a hardened expression.'
+      also_string = ' also' if actor_level > 20 else ''
+      player_state_string += f' {player_name}{also_string} looks like a veteran, with many scars and a hardened expression.'
 
     # Describe the player's relative strength (using HP for reference)
     relative_strength_string = 'In terms of physical strength, if you were to fight, '
@@ -266,7 +293,7 @@ class Model:
         strength_advantage = -2
 
     if strength_advantage == 2:
-      relative_strength_string += 'you think the player would significantly overpower you.'
+      relative_strength_string += f'you think {player_name} would significantly overpower you.'
     elif strength_advantage == 1:
       relative_strength_string += 'you think you would be at a disadvantage.'
     elif strength_advantage == 0:
@@ -274,7 +301,7 @@ class Model:
     elif strength_advantage == -1:
       relative_strength_string += 'you think you would have the advantage.'
     elif strength_advantage == -2:
-      relative_strength_string += 'you think you could easily overpower the player.'
+      relative_strength_string += f'you think you could easily overpower {player_name}.'
     
     both_are_physically_weak = player_max_health < 100.0 and actor_max_health < 100.0 and strength_advantage != 0
     if both_are_physically_weak:
@@ -302,15 +329,15 @@ class Model:
     #also_string = ' also' if ((magic_advantage > 0 and strength_advantage > 0) or (magic_advantage < 0 and strength_advantage < 0)) else ''
     also_string = ' also' if magic_advantage == strength_advantage else ''
     if magic_advantage == 2:
-      relative_magic_string += f'you think the player would{also_string} significantly overpower you.'
+      relative_magic_string += f'you{also_string} think {player_name} would significantly overpower you.'
     elif magic_advantage == 1:
-      relative_magic_string += f'you think you would{also_string} be at a disadvantage.'
+      relative_magic_string += f'you{also_string} think you would be at a disadvantage.'
     elif magic_advantage == 0:
-      relative_magic_string += f'you think you would{also_string} be evenly matched.'
+      relative_magic_string += f'you{also_string} think you would be evenly matched.'
     elif magic_advantage == -1:
-      relative_magic_string += f'you think you would{also_string} have the advantage.'
+      relative_magic_string += f'you{also_string} think you would have the advantage.'
     elif magic_advantage == -2:
-      relative_magic_string += f'you think you could{also_string} easily overpower the player.'
+      relative_magic_string += f'you{also_string} think you could easily overpower {player_name}.'
     
     if player_max_magicka < 100.0 and actor_max_magicka < 100.0 and magic_advantage != 0:
       # If everyone is bad at magic AND strength, add 'either' so the repetition doesn't sound as bad.
@@ -320,11 +347,21 @@ class Model:
       either_string = ', either' if both_are_physically_weak else ''
       relative_magic_string += f" But neither of you appears well-versed in magic{either_string}."
     
-    # Touch-up the actor's class to rephrase '<class> Service' to something that ChatGPT understands better
-    actor_class = input_json['actor_class']
-    if actor_class.endswith(' Service'):
-        actor_class = actor_class[:-len(' Service')]
-        actor_class = f'{actor_class} who offers their services to others'
+    # Give an 'overall' description at the end by adding the two advantages.
+    overall_advantage_string = 'Overall, you think'
+    overall_advantage = strength_advantage + magic_advantage
+
+    if overall_advantage > 3: # 4
+      overall_advantage_string += " you should definitely avoid confrontation with this person."
+    elif overall_advantage > 1: # 2, 3
+      overall_advantage_string += " they're stronger than you. You wouldn't win a fight, if they wanted to have one."
+    elif overall_advantage > -2: # -1, 0, 1
+      overall_advantage_string += " it would be a struggle to win in a fight against this person, if their intentions are hostile."
+    elif overall_advantage > -4: # -2, -3
+      overall_advantage_string += " you shouldn't be intimidated by them."
+    else: # -4
+      overall_advantage_string += " they couldn't cause you any harm. even if they tried."
+
 
     # The setup prompt for the first 'chat' message.
     setup_prompt = f"""
@@ -333,15 +370,15 @@ You are a role-playing game character in the world of The Elder Scrolls III: Mor
 Respond in-character using descriptive language. Don't repeat exactly word-for-word the description below. Also, don't use quotation around your entire response, it's understood that your response is dialogue.
 
 == Context ==
-You are a character named "{input_json["actor"]}", you are a {input_json["actor_race"]} {actor_class}.{optional_actor_faction_string}{optional_actor_factoid_string}
+You are a character named "{actor_name}", you are a {actor_malefemale} {actor_race} {actor_class}.{optional_actor_faction_string}{optional_actor_factoid_string}
 
-The player is named "{input_json["player_name"]}", they are a {input_json["player_race"]} {input_json["player_class"]}.{optional_player_faction_string}{optional_player_factoid_string}
+The player is named "{player_name}", they are a {player_malefemale} {player_race} {player_class}.{optional_player_faction_string}{optional_player_factoid_string}
 
 {actor_state_string} {player_state_string}
 
-{relative_strength_string} {relative_magic_string}
+{relative_strength_string} {relative_magic_string} {overall_advantage_string}
 
-You and the player are located in "{input_json["location"]}". The player greets you.
+{actor_name} and {player_name} are located in "{location}". {player_name} greets your character, {actor_name}.
 """
 
     # The messages from the in-game conversation.
@@ -358,7 +395,7 @@ You and the player are located in "{input_json["location"]}". The player greets 
     #   Theory: text model will be able to more easily intuit a single digit than a two digit number.
     #   Context: All the numbers from 1 up to like 500 are one single token to the model.
     #            It might be easier for the model to provide meaningful distinction between 10 different tokens than 100.
-    player_prompt = f'[NOTE: Your current disposition towards the player is {int(input_json["actor_disposition"]) // 10} / 10.]\n\n{player_prompt}'
+    player_prompt = f'[NOTE: {actor_name}\'s current disposition towards {player_name} is {int(input_json["actor_disposition"]) // 10} / 10.]\n\n{player_prompt}'
     
     # The messages sent to the API
     conversation = [
@@ -378,21 +415,23 @@ You and the player are located in "{input_json["location"]}". The player greets 
     if DEBUG:
       return output_json_str
 
-    response = openai.ChatCompletion.create(
-      model=self.model_name,
-      temperature=self.temperature,
-      messages=conversation,
-    )
-    # Mock response for testing
-    '''response = {
-      "choices": [
-        {
-          "message": {
-            "content": "Hello, world!"
+    if RETURN_MOCK_RESPONSE:
+      # Mock response for testing
+      response = {
+        "choices": [
+          {
+            "message": {
+              "content": "Hello, world!"
+            }
           }
-        }
-      ]
-    }'''
+        ]
+      }
+    else:
+      response = openai.ChatCompletion.create(
+        model=self.model_name,
+        temperature=self.temperature,
+        messages=conversation,
+      )
 
     if TRACING:
       message_contents = json.dumps({
@@ -403,5 +442,8 @@ You and the player are located in "{input_json["location"]}". The player greets 
       message_contents = gzip.compress(message_contents.encode("utf-8"))
       self.queue_client.send_message(self.queue_client.message_encode_policy.encode(message_contents))
 
+    if RETURN_MOCK_RESPONSE:
+      # Can't do response.choices since it's a mock dict and not an object.
+      return response['choices'][0]['message']['content']
     return response.choices[0]['message']['content']
-    #return response['choices'][0]['message']['content']
+    #
