@@ -29,6 +29,7 @@ DEBUG = False
 TRACING_ENDPOINT = os.environ.get("TRACING_ENDPOINT")
 
 TRACING = TRACING_ENDPOINT != ""
+#TRACING = False
 
 if TRACING:
   from azure.storage.queue import QueueClient, BinaryBase64EncodePolicy
@@ -127,6 +128,45 @@ class Model:
     else:
       optional_actor_factoid_string = " The character you're playing as doesn't have any reputation. Feel free to make up a simple backstory for them."
 
+    # Description of the actor's state (health, magic, fatigue)
+    actor_current_health = float(input_json["actor_current_health"])
+    actor_current_magicka = float(input_json["actor_current_magicka"])
+    actor_current_fatigue = float(input_json["actor_current_fatigue"])
+    actor_max_health = float(input_json["actor_max_health"])
+    actor_max_magicka = float(input_json["actor_max_magicka"])
+    actor_max_fatigue = float(input_json["actor_max_fatigue"])
+    actor_health_percentage = actor_current_health / actor_max_health
+    actor_magicka_percentage = actor_current_magicka / actor_max_magicka
+    actor_fatigue_percentage = actor_current_fatigue / actor_max_fatigue
+    
+    actor_state_string = ''
+    actor_in_good_health = True
+
+    if actor_health_percentage > 0.5 and actor_magicka_percentage > 0.5 and actor_fatigue_percentage > 0.5:
+      actor_state_string = "You are in good health."
+    else: # At least one stat is below 50%
+      actor_in_good_health = False
+      # Build up description, then wrap it in 'You are <description>.'
+      if actor_health_percentage < 0.5:
+        if actor_health_percentage < 0.25:
+          actor_state_string += 'severely injured'
+        else:
+          actor_state_string += 'injured'
+      if actor_magicka_percentage < 0.5:
+        if actor_state_string != '':
+          actor_state_string += ', '
+        actor_state_string += 'low on magicka'
+      if actor_fatigue_percentage < 0.5:
+        if actor_state_string != '':
+          actor_state_string += ', and '
+        if actor_fatigue_percentage < 0.25:
+          actor_state_string += 'completely exhausted'
+        else:
+          actor_state_string += 'slightly worn-out'
+      
+
+      actor_state_string = f'You are {actor_state_string}.'
+
     # Optional interesting factoid about the player the actor may know about.
     optional_player_factoid_string = ''
 
@@ -157,7 +197,111 @@ class Model:
         optional_player_factoid_string = f" {input_json['player_name']} is a known criminal, likely a murderer. You know they are wanted by the authorities."
       else:
         optional_player_factoid_string = f" {input_json['player_name']} is a known serial-killer, authority has made it known that the player should be fled from or killed on sight."
+    
+    # Description of player's state
+    player_current_health = float(input_json["player_current_health"])
+    player_current_magicka = float(input_json["player_current_magicka"])
+    player_current_fatigue = float(input_json["player_current_fatigue"])
+    player_max_health = float(input_json["player_max_health"])
+    player_max_magicka = float(input_json["player_max_magicka"])
+    player_max_fatigue = float(input_json["player_max_fatigue"])
+    player_health_percentage = player_current_health / player_max_health
+    player_magicka_percentage = player_current_magicka / player_max_magicka
+    player_fatigue_percentage = player_current_fatigue / player_max_fatigue
+    
+    player_state_string = ''
+    player_in_good_health = True
 
+    if player_health_percentage > 0.5 and player_magicka_percentage > 0.5 and player_fatigue_percentage > 0.5:
+      also_string = ' also' if actor_in_good_health else ''
+      player_state_string = f"The player is{also_string} in good health."
+    else: # At least one stat is below 50%
+      player_in_good_health = False
+      # Build up description, then wrap it in 'The player looks <description>.'
+      if player_health_percentage < 0.5:
+        if player_health_percentage < 0.25:
+          player_state_string += 'severely injured, with open wounds visible'
+        else:
+          player_state_string += 'injured, bleeding slightly'
+      if player_magicka_percentage < 0.5:
+        if player_state_string != '':
+          player_state_string += ', '
+        player_state_string += 'tired from magicka use'
+      if player_fatigue_percentage < 0.5:
+        if player_state_string != '':
+          player_state_string += ', and '
+        if player_fatigue_percentage < 0.25:
+          player_state_string += 'completely exhausted, gasping for breath'
+        else:
+          player_state_string += 'slightly worn-out, breathing hard'
+      
+      player_state_string = f'The player looks {player_state_string}.'
+
+    # Describe the player's relative strength (using HP for reference)
+    relative_strength_string = 'In terms of physical strength, if you were to fight, '
+    strength_advantage = 0 # + = player, 0 = even, - = actor
+
+    if not player_in_good_health or not actor_in_good_health:
+      relative_strength_string += 'assuming both of you were in perfect condition, '
+    
+    if player_max_health > actor_max_health * 1.25:
+      strength_advantage = 1
+      if player_max_health > actor_max_health * 1.5:
+        strength_advantage = 2
+    elif player_max_health < actor_max_health * 0.75:
+      strength_advantage = -1
+      if player_max_health < actor_max_health * 0.5:
+        strength_advantage = -2
+
+    if strength_advantage == 2:
+      relative_strength_string += 'you think the player would significantly overpower you.'
+    elif strength_advantage == 1:
+      relative_strength_string += 'you think you would be at a disadvantage.'
+    elif strength_advantage == 0:
+      relative_strength_string += 'you think you would be evenly matched.'
+    elif strength_advantage == -1:
+      relative_strength_string += 'you think you would have the advantage.'
+    elif strength_advantage == -2:
+      relative_strength_string += 'you think you could easily overpower the player.'
+    
+    if player_max_health < 100.0 and actor_max_health < 100.0 and strength_advantage != 0:
+      relative_strength_string += " But neither of you look very strong."
+    
+    # Describe the player's relative magical strength
+    magic_advantage = 0 # + = player, 0 = even, - = actor
+
+    if player_max_magicka > actor_max_magicka * 1.25:
+      magic_advantage = 1
+      if player_max_magicka > actor_max_magicka * 1.5:
+        magic_advantage = 2
+    elif player_max_magicka < actor_max_magicka * 0.75:
+      magic_advantage = -1
+      if player_max_magicka < actor_max_magicka * 0.5:
+        magic_advantage = -2
+    
+    if (magic_advantage >= 0 and strength_advantage < 0) or (magic_advantage < 0 and strength_advantage >= 0):
+      # The player is better at magic and the actor is better at strength or vice versa
+      relative_magic_string = 'However, in terms of magical strength, '
+    else:
+      # Either the player or actor is better, or they're both the same.
+      relative_magic_string = 'And in terms of magical strength, '
+    
+    #also_string = ' also' if ((magic_advantage > 0 and strength_advantage > 0) or (magic_advantage < 0 and strength_advantage < 0)) else ''
+    also_string = ' also' if magic_advantage == strength_advantage else ''
+    if magic_advantage == 2:
+      relative_magic_string += f'you think the player would{also_string} significantly overpower you.'
+    elif magic_advantage == 1:
+      relative_magic_string += f'you think you would{also_string} be at a disadvantage.'
+    elif magic_advantage == 0:
+      relative_magic_string += f'you think you would{also_string} be evenly matched.'
+    elif magic_advantage == -1:
+      relative_magic_string += f'you think you would{also_string} have the advantage.'
+    elif magic_advantage == -2:
+      relative_magic_string += f'you think you could{also_string} easily overpower the player.'
+    
+    if player_max_magicka < 100.0 and actor_max_magicka < 100.0 and magic_advantage != 0:
+      relative_magic_string += " But neither of you are well-versed in magic."
+    
     # Touch-up the actor's class to rephrase '<class> Service' to something that ChatGPT understands better
     actor_class = input_json['actor_class']
     if actor_class.endswith(' Service'):
@@ -175,7 +319,11 @@ You are a character named "{input_json["actor"]}", you are a {input_json["actor_
 
 The player is named "{input_json["player_name"]}", they are a {input_json["player_race"]} {input_json["player_class"]}.{optional_player_faction_string}{optional_player_factoid_string}
 
-You and the player are located in "{input_json["location"]}". The player greets your character.
+{actor_state_string} {player_state_string}
+
+{relative_strength_string} {relative_magic_string}
+
+You and the player are located in "{input_json["location"]}". The player greets you.
 """
 
     # The messages from the in-game conversation.
