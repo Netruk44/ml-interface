@@ -9,18 +9,16 @@ Neither way is guaranteed to work, since things are still in early development. 
 
 The mod is currently only tested on Mac, with Linux support assumed. Windows currently is not supported at all.
 
-> **Note**: Windows support wouldn't be too hard to add (most of the heavy lifting is done by Python and Conda), but there's some `.sh` scripts that are run as part of the text-generation process that would have to be replaced with batch scripts.
+> **Note**: Windows support wouldn't be too hard to add (most of the heavy lifting is done by Python), but there's some `.sh` scripts that are run as part of the text-generation process that would have to be replaced with batch scripts.
 
 ## Prerequisites
-Regardless of which option you go with, you need to set up the ML environment first. While running the game,  [miniconda](https://docs.conda.io/en/latest/miniconda.html) (or similar) must be available for the game to run. The game uses `conda run` to run the models.
+Regardless of which option you go with, you need to set up the ML environment first. While running the game, Python with the `venv` module is used to run the text-generation scripts. The scripts are run in a virtual environment, so you need to set that up first. Create the environment by running `ml-interface.sh init` located at the root of this repository.
 
-Set up a new environment called `openmw_ml` and install the the following packages:
-* `python=3.11`
-* `transformers`
-* `sentencepiece`
-* `openai`
+> **Note**: This creates a virtual environment under `$HOME/.venv/openmw_ml`. You can remove it with `ml-interface.sh clean`.
+>
+> If you want to change the location, you can change the `VENV_DIR` variable in `ml-interface.sh` to the path you want to use before running the script.
 
-This environment will be used by the mod to generate text. Once your environment is set up, continue onto either option 1 or 2 below.
+Once your environment is set up, continue onto either option 1 or 2 below.
 
 ## Option 1 - Nix (Easiest)
 Nix itself isn't the easiest thing to use, but I have commands for you to use below that should work for anybody, if you can get Nix installed.
