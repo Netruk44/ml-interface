@@ -14,7 +14,9 @@ class Model:
 
     def predict(self, input_json):
         # Remove the .venv directory relative to this file
-        venv_dir = os.path.join(os.path.dirname(__file__), '../../' , ".venv")
+        #venv_dir = os.path.join(os.path.dirname(__file__), '../../' , ".venv", "openmw_ml")
+        # Remove the .venv directory relative to the home directory
+        venv_dir = os.path.join(os.path.expanduser("~"), ".venv", "openmw_ml")
         print(f"Removing {venv_dir}")
         if os.path.exists(venv_dir):
             os.system(f"rm -rf {venv_dir}")

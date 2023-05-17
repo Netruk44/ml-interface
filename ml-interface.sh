@@ -1,7 +1,7 @@
 #! /bin/bash
 
 VENV_NAME=openmw_ml
-VENV_DIR="$(dirname "$0")/.venv/$VENV_NAME"
+VENV_DIR="$HOME/.venv/$VENV_NAME"
 REQUIREMENTS_FILE="$(dirname "$0")/requirements.txt"
 
 # Check if the venv exists, and create it if it doesn't
