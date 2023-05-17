@@ -12,15 +12,13 @@ Generically, the repository can be used as follows...
 > **Warning**: The following may be out of date, things are still in very early development. Check the scripts for the most accurate information.
 
 ### Installation
-* Create a conda environment, e.g. `game_ml`.
-* Install into the environment the packages needed for the models you intend to run.
-  * You can find those packages in the requirements comment inside `model.py` for the model you wish to run.
+* Run `ml-interface.sh init` to create the venv and install dependencies.
 
 ### Running
 * Create an input json for the model you wish to run.
   * The schema/layout of the json depends on the model being run, so there is no generic example available.
   * For model-specific examples, look inside the `input` folder of the model you wish to run.
-* ~~Set environment variable `CONDA_ENV_NAME` to the name of the conda environment you created above.~~
+* ~~Set environment variable `VENV_NAME` to the name of the conda environment you created above.~~
   * **TODO**: Not yet impletmented, currently the script is hardcoded to run scripts in the `openmw_ml` environment.
 * Execute `ml-interface.sh`.
-  * Example: `ml-interface.sh openai /path/to/input.json`
+  * Example: `ml-interface.sh openai_chat /path/to/input.json`

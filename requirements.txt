@@ -1,0 +1,11 @@
+
+# openai_chat:
+openai
+
+# optional
+azure-storage-queue
+
+
+# t5_test:
+transformers
+sentencepiece
