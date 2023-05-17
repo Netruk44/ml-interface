@@ -14,14 +14,14 @@ Model output will be written to stdout.
 import sys
 
 def main():
-    if len(sys.argv) != 3:
+    if len(sys.argv) == 1:
         print("Usage: ml-interface.py <model_name> <input_json>")
         sys.exit(1)
 
     model_name = sys.argv[1]
     # Override hack
     #model_name = "dummy_readjson"
-    input_json = sys.argv[2]
+    input_json = sys.argv[2] if len(sys.argv) > 2 else ''
 
     # Import the model
     # Models are available under models.model_name (if it exists)

@@ -1,6 +1,6 @@
 '''
 init model
-Doesn't do anything, just a model to run that
+Fake model. Doesn't do anything, just a model to run that
 ensure the whole process works end-to-end.
 '''
 
@@ -11,4 +11,4 @@ class Model:
         pass
 
     def predict(self, input_json):
-        return ""
+        return "Init completed, ready to run models."
