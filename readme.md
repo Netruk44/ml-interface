@@ -19,7 +19,7 @@ Generically, the repository can be used as follows...
 ### Running
 * Create an input json for the model you wish to run.
   * The schema/layout of the json depends on the model being run, so there is no generic example available.
-  * For model-specific examples, look inside the `input` folder of the model you wish to run.
+  * For model-specific examples, look inside the `examples` folder of the model you wish to run.
 * ~~Set environment variable `VENV_NAME` to the name of the conda environment you created above.~~
   * **TODO**: Not yet impletmented, currently the script is hardcoded to run scripts in the `openmw_ml` environment.
 * Execute `ml-interface.sh`.
