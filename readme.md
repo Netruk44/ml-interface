@@ -13,6 +13,8 @@ Generically, the repository can be used as follows...
 
 ### Installation
 * Run `ml-interface.sh init` to create the venv and install dependencies.
+  * This creates a virtualenv called 'openmw_ml' in `~/.venv/openmw_ml` with a few dependencies installed.
+  * To delete the venv, run `ml-interface.sh clean`.
 
 ### Running
 * Create an input json for the model you wish to run.
