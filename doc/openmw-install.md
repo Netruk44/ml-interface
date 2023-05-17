@@ -12,7 +12,9 @@ The mod is currently only tested on Mac, with Linux support assumed. Windows cur
 > **Note**: Windows support wouldn't be too hard to add (most of the heavy lifting is done by Python), but there's some `.sh` scripts that are run as part of the text-generation process that would have to be replaced with batch scripts.
 
 ## Prerequisites
-Regardless of which option you go with, you need to set up the ML environment first. While running the game, Python with the `venv` module is used to run the text-generation scripts. The scripts are run in a virtual environment, so you need to set that up first. Create the environment by running `ml-interface.sh init` located at the root of this repository.
+Regardless of which option you go with, you need to set up the ML environment first.
+
+* Create the environment by running "`ml-interface.sh init`", the script is located at the root of this repository.
 
 > **Note**: This creates a virtual environment under `$HOME/.venv/openmw_ml`. You can remove it with `ml-interface.sh clean`.
 >

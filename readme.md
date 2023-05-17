@@ -13,6 +13,7 @@ Generically, the repository can be used as follows...
 
 ### Installation
 * Run `ml-interface.sh init` to create the venv and install dependencies.
+  * Requires `python3` to be on the path and `venv` to be installed.
   * This creates a virtualenv called 'openmw_ml' in `~/.venv/openmw_ml` with a few dependencies installed.
   * To delete the venv, run `ml-interface.sh clean`.
 
