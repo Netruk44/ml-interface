@@ -28,9 +28,12 @@ OPENAI_MODEL_TEMPERATURE = 0.85
 
 FORCE_UPDATE_ALL = False
 
+# Input:
 json_input_container = 'js_input'
 json_output_container = 'js_output'
 api_output_continer = 'api_output'
+
+# Output:
 disposition_container = 'disposition'
 
 def get_collection(collection_name):
