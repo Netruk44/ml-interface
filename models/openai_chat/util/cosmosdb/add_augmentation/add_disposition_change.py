@@ -7,12 +7,10 @@
 # pip install tqdm
 # pip install openai
 #
+# os.environ["COSMOS_CONNECTION_STRING"] - set to your cosmosdb connection string
 # os.environ["OPENAI_API_KEY"] - set to your openai api key
 
 import os
-import json
-import sys
-import time
 from azure.cosmos import CosmosClient
 from tqdm import tqdm
 import openai
