@@ -36,12 +36,6 @@ RETURN_MOCK_RESPONSE = False
 # If you would like to help me out with generating data, send me an e-mail at somethingelse@danieltperry.me and I can give you my SAS token.
 TRACING_ENDPOINT = os.environ.get("TRACING_ENDPOINT")
 
-# Enable disposition changes
-# Send an additional request to the api to query for the change in disposition for the response.
-# Used to generate training data for a smaller t5-based model.
-# TODO: Probably remove this, this doesn't need to be run mid-game, it can be generated afterward.
-ENABLE_DISPOSITION_CHANGES = True
-
 ######################### Auto-configuration
 TRACING = TRACING_ENDPOINT != ""
 #TRACING = False # Manual override
@@ -459,46 +453,6 @@ The player is named "{player_name}", they are a {player_malefemale} {player_race
     # Can't do response.choices on the mock response, since it's a dict and not an object. Need to use response['choices'] instead.
     text_response = response.choices[0]['message']['content'] if not RETURN_MOCK_RESPONSE else response['choices'][0]['message']['content']
     text_response = self.clean_response(text_response)
-    
-    if ENABLE_DISPOSITION_CHANGES:
-      # Replace the final message with the original prompt instead of the one annotated with the current disposition.
-      conversation[-1]["content"] = original_player_prompt
-
-      # Add the model's response to the dialogue
-      conversation.append({"role": "assistant", "content": text_response})
-
-      # Add a new message asking the model for a disposition change
-      disp_message = f'''[PAUSE DIALOGUE]
-Given {actor_name}'s response to what {player_name} said, how has {actor_name}'s disposition towards {player_name} changed?
-
-Think things through from the perspective of {actor_name}. Come up with one or more sentences that describe what {actor_name} might be thinking about {player_name}, if anything, then end your response with [a number between square brackets].
-
-The number should be between -100 and +100, where a positive number indicates a more positive attitude towards {player_name}, and a negative number indicates a more negative attitude towards {player_name}.
-
-For an example of scale:
-  * A disposition change of +/- 5 would be appropriate for a rude or insulting comment, or kind or flattering comment.
-  * A change of 20 would be appropriate for larger gestures such as a gift or personal threat.
-  * A change of 50 would be appropriate for a major betrayal or a major act of kindness.
-  * Changes larger than 50 should be used only in extremely rare circumstances, left open to your discretion.
-
-Feel free to use any number between the examples, depending on how strongly {actor_name} feels.'''
-      conversation.append({"role": "user", "content": disp_message})
-
-      disp_response = openai.ChatCompletion.create(
-        model=self.model_name,
-        temperature=self.temperature,
-        messages=conversation,
-      )
-      disp_response = disp_response.choices[0]['message']['content']
-
-      # Write disp_response to stderr
-      print(disp_response, file=sys.stderr)
-
-      # Find the number between square brackets
-      disp_response = re.search(r'\[(-?\d+)\]', disp_response)
-
-      # Append the disposition change to the response with square brackets intact.
-      text_response += disp_response.group(0)
 
     return text_response
   
