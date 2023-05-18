@@ -86,7 +86,7 @@ Feel free to use any number between the examples, depending on how strongly {act
     try:
         # Look for the disposition change, the number between square brackets
         # Use a regular expression to look for "[(+/-)number]"
-        # Make sure to allow for "[+12]" as well as ["-12"]
+        # Make sure to allow for 3 variations: "[+12]" "[12]" and "[-12]" as the model is unpredictable.
         re_expression = r'\[([+-]?\d+)\]'
         re_search = re.search(re_expression, response_text)
 
