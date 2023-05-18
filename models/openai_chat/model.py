@@ -15,14 +15,19 @@ import openai
 import json
 import os
 import random
+import sys
+import re
 
+######################### Configuration
+# OpenAI API Key
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 # Debug mode
 # Instead of calling the api, return the content that would have been sent to the api
 DEBUG = False
 
-# Instead of calling the api, return a static response
+# Mock mode
+# Instead of calling the real api, return a static response
 RETURN_MOCK_RESPONSE = False
 
 # Message tracing
@@ -31,14 +36,21 @@ RETURN_MOCK_RESPONSE = False
 # If you would like to help me out with generating data, send me an e-mail at somethingelse@danieltperry.me and I can give you my SAS token.
 TRACING_ENDPOINT = os.environ.get("TRACING_ENDPOINT")
 
+# Enable disposition changes
+# Send an additional request to the api to query for the change in disposition for the response.
+# Used to generate training data for a smaller t5-based model.
+# TODO: Probably remove this, this doesn't need to be run mid-game, it can be generated afterward.
+ENABLE_DISPOSITION_CHANGES = True
+
+######################### Auto-configuration
 TRACING = TRACING_ENDPOINT != ""
-#TRACING = False
+#TRACING = False # Manual override
 
 if TRACING:
   from azure.storage.queue import QueueClient, BinaryBase64EncodePolicy
   import gzip
   queue_name = "openmw-messages"
-
+#########################
 
 class Model:
   def __init__(self,
@@ -390,14 +402,14 @@ The player is named "{player_name}", they are a {player_malefemale} {player_race
     } for message in input_json["history"]]
 
     # The prompt that the player entered, to be answered by the AI.
-    player_prompt = input_json["prompt"]
+    original_player_prompt = input_json["prompt"]
 
     # Add information about the actor's current disposition towards the player.
     # Scale from 1-100 to a 1-10 scale
     #   Theory: text model will be able to more easily intuit a single digit than a two digit number.
     #   Context: All the numbers from 1 up to like 500 are one single token to the model.
     #            It might be easier for the model to provide meaningful distinction between 10 different tokens than 100.
-    player_prompt = f'[NOTE: {actor_name}\'s current disposition towards {player_name} is {int(input_json["actor_disposition"]) // 10} / 10.]\n\n{player_prompt}'
+    player_prompt = f'[NOTE: {actor_name}\'s current disposition towards {player_name} is {int(input_json["actor_disposition"]) // 10} / 10.]\n\n{original_player_prompt}'
     
     # The messages sent to the API
     conversation = [
@@ -444,8 +456,53 @@ The player is named "{player_name}", they are a {player_malefemale} {player_race
       message_contents = gzip.compress(message_contents.encode("utf-8"))
       self.queue_client.send_message(self.queue_client.message_encode_policy.encode(message_contents))
 
-    if RETURN_MOCK_RESPONSE:
-      # Can't do response.choices since it's a mock dict and not an object.
-      return response['choices'][0]['message']['content']
-    return response.choices[0]['message']['content']
-    #
+    # Can't do response.choices on the mock response, since it's a dict and not an object. Need to use response['choices'] instead.
+    text_response = response.choices[0]['message']['content'] if not RETURN_MOCK_RESPONSE else response['choices'][0]['message']['content']
+    text_response = self.clean_response(text_response)
+    
+    if ENABLE_DISPOSITION_CHANGES:
+      # Replace the final message with the original prompt instead of the one annotated with the current disposition.
+      conversation[-1]["content"] = original_player_prompt
+
+      # Add the model's response to the dialogue
+      conversation.append({"role": "assistant", "content": text_response})
+
+      # Add a new message asking the model for a disposition change
+      disp_message = f'''[PAUSE DIALOGUE]
+Given {actor_name}'s response to what {player_name} said, how has {actor_name}'s disposition towards {player_name} changed?
+
+Think things through from the perspective of {actor_name}. Come up with one or more sentences that describe what {actor_name} might be thinking about {player_name}, if anything, then end your response with [a number between square brackets].
+
+The number should be between -100 and +100, where a positive number indicates a more positive attitude towards {player_name}, and a negative number indicates a more negative attitude towards {player_name}.
+
+For an example of scale:
+  * A disposition change of +/- 5 would be appropriate for a rude or insulting comment, or kind or flattering comment.
+  * A change of 20 would be appropriate for larger gestures such as a gift or personal threat.
+  * A change of 50 would be appropriate for a major betrayal or a major act of kindness.
+  * Changes larger than 50 should be used only in extremely rare circumstances, left open to your discretion.
+
+Feel free to use any number between the examples, depending on how strongly {actor_name} feels.'''
+      conversation.append({"role": "user", "content": disp_message})
+
+      disp_response = openai.ChatCompletion.create(
+        model=self.model_name,
+        temperature=self.temperature,
+        messages=conversation,
+      )
+      disp_response = disp_response.choices[0]['message']['content']
+
+      # Write disp_response to stderr
+      print(disp_response, file=sys.stderr)
+
+      # Find the number between square brackets
+      disp_response = re.search(r'\[(-?\d+)\]', disp_response)
+
+      # Append the disposition change to the response with square brackets intact.
+      text_response += disp_response.group(0)
+
+    return text_response
+  
+  def clean_response(self, text):
+    # Sometimes the model likes to encase the response in quotes, which is incorrect.
+    text = text.strip('"')
+    return text
