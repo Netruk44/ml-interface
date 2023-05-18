@@ -1,4 +1,6 @@
 
+.env
+
 # Python gitignore
 *.py[cod]
 *$py.class
