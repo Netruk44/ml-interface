@@ -4,6 +4,7 @@
 
 # Requirements:
 # pip install azure-cosmos
+# pip install tqdm
 
 import os
 import json
