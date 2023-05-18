@@ -92,16 +92,16 @@ Feel free to use any number between the examples, depending on how strongly {act
         disposition_change = int(re_search.group(1))
 
         # Construct the disposition change document
-        document_id = str(uuid.uuid4())
+        message_id = json_input['message_id']
         disposition_change_document = {
-            'id': document_id,
+            'id': message_id,
             'disposition_change': disposition_change,
             'model': OPENAI_MODEL_NAME,
             'temperature': OPENAI_MODEL_TEMPERATURE,
             'messages': messages,
             'response': response,
-            'message_id': json_input['message_id'],
-            'document_id': document_id,
+            'message_id': message_id,
+            'document_id': str(uuid.uuid4()),
         }
 
         return disposition_change_document
