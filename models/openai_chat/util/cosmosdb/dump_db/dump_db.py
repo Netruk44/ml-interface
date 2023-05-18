@@ -18,6 +18,7 @@ collections_to_dump = [
     'api_output',
     'js_input',
     'js_output',
+    'disposition',
 ]
 
 client = CosmosClient.from_connection_string(COSMOS_CONNECTION_STRING)
