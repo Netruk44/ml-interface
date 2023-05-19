@@ -1,0 +1,4 @@
+
+# Ignore all subdirectories and datasets
+*/
+*.zip
