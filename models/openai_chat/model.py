@@ -256,23 +256,24 @@ class Model:
             actor_inventory_string += ', and '
           else:
             actor_inventory_string += ', '
-
-        number_of_items_in_set = len(prefixes[prefix])
+        
+        items_with_same_prefix = prefixes[prefix]
+        number_of_items_in_set = len(items_with_same_prefix)
+        
+        first_item_name = items_with_same_prefix[0]
+        first_item_count = input_json["actor_inventory"]["items"][first_item_name]
+        first_item_count = int(first_item_count)
 
         # Figure out the appropriate prefix (a couple of, a set of, a complete set of)
         set_descriptor = ''
         
-        example_item_name = prefixes[prefix][0]
-        example_item_count = input_json["actor_inventory"]["items"][example_item_name]
-        example_item_count = int(example_item_count)
-        
         if number_of_items_in_set == 1:
           # This may not be a set of items, but there may be more than one in this stack.
-          if example_item_count == 1:
+          if first_item_count == 1:
             set_descriptor = 'a'
-          elif example_item_count == 2:
+          elif first_item_count == 2:
             set_descriptor = 'two'
-          elif example_item_count < 10:
+          elif first_item_count < 10:
             set_descriptor = 'a few'
           else:
             set_descriptor = 'a stack of'
@@ -288,7 +289,7 @@ class Model:
 
         category = ''
         # Figure out the set description, armor/clothing/weapons/potions
-        for item_name in prefixes[prefix]:
+        for item_name in items_with_same_prefix:
           # Common/Extravagent Clothing
           if (item_name.endswith("Shirt") 
           or item_name.endswith("Shoes") 
@@ -302,11 +303,11 @@ class Model:
             category = 'clothing'
 
             # Robes are a special subset of clothing, check everything in the set to see if it's a robe.
-            if any(other_item_name.endswith("Robe") for other_item_name in prefixes[prefix]):
+            if any(other_item_name.endswith("Robe") for other_item_name in items_with_same_prefix):
               category = 'robes'
-              break
+
             break
-          
+
           # Armor
           if (item_name.endswith("Cuirass")
           or item_name.endswith("Boots")
@@ -339,11 +340,6 @@ class Model:
             or item_name.endswith("Probe")):
             category = 'lockpicking equipment'
             break
-        #else:
-          # Unknown what kind of item this is, write to stderr
-          #print(f'Unknown item type: {item_name}', file=sys.stderr)
-          #actor_inventory_string += item_name
-          #pass
         
         # Fixups
         # 'a common clothing' -> 'a piece of common clothing' (correct grammar)
@@ -353,7 +349,10 @@ class Model:
         
         # 'a steel weapon' -> 'a steel longsword weapon' (be specific if there's only one item in the set)
         if (category == 'weapon' and number_of_items_in_set == 1):
-          prefix = prefixes[prefix][0]
+          # Replace the shared prefix with the entire item name
+          prefix = first_item_name
+          # Alternatively:
+          # category = '' # Will trigger the "len(category) == 0" check below
 
         # 'a Expensive robes' -> 'a set of Expensive robes'
         if (category == 'robes' and number_of_items_in_set == 1):
@@ -370,18 +369,18 @@ class Model:
         
         # 'a guide' -> 'a guide to Balmora'
         # If we don't know the category, but there's more to the name than just the prefix, use that.
-        if (len(category) == 0
-            and len(prefixes[prefix][0]) > len(prefix)):
+        if (len(category) == 0                        # No category
+            and len(first_item_name) > len(prefix)):  # There's more to the name than just the prefix
 
           if number_of_items_in_set == 1:
-            category = prefixes[prefix][0][len(prefix):]
+            category = first_item_name[len(prefix):]
             category = category.strip()
 
-            if example_item_count > 1:
+            if first_item_count > 1:
               category = f'{category}s'
           else:
             # More than likely this is an item with a common prefix.
-            # 'a couple pieces of guides' -> 'a couple guides'
+            # 'a couple pieces of guide' -> 'a couple guides'
             set_descriptor = set_descriptor.replace(' pieces of', '')
             prefix = f'{prefix}s'
         
