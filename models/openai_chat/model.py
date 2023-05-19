@@ -204,6 +204,204 @@ class Model:
     elif actor_level > 20:
       actor_state_string += ' You are a veteran when it comes to combat.'
 
+    # Actor inventory
+    actor_inventory_string = 'In your possession, you have '
+
+    # Gold and Store gold
+    actor_gold = int(input_json["actor_inventory"]["gold"])
+    actor_owned_store_gold = int(input_json["actor_inventory"]["store_gold"])
+
+    if actor_gold == 0 and actor_owned_store_gold == 0:
+      # Reset the start of the string
+      actor_inventory_string = 'You do not currently posess any gold pieces, however your character may have some gold stored elsewhere depending on their background.'
+    elif actor_gold == 0 and actor_owned_store_gold > 0:
+      actor_inventory_string += f'no gold pieces on you, but the store you own has {actor_owned_store_gold} gold pieces in the lockbox.'
+    elif actor_gold > 0 and actor_owned_store_gold == 0:
+      actor_inventory_string += f'{actor_gold} gold pieces.'
+    else:
+      actor_inventory_string += f'{actor_gold} gold pieces, and the store you own has {actor_owned_store_gold} gold pieces in the lockbox.'
+    
+    # Actor inventory items
+
+    # Do a rudimentary attempt at summarizing inventory contents based on shared prefixes.
+    # TODO: Possibly train a T5 model to do this automatically.
+    prefixes = {}
+
+    for item in input_json["actor_inventory"]["items"]:
+      prefix = item.split(' ')[0]
+      if prefix not in prefixes:
+        prefixes[prefix] = []
+      prefixes[prefix].append(item)
+    
+    # Mention the sets of itmes the actor has, then fill any empty space with items
+    max_item_count = 3
+    items_remaining = max_item_count
+
+    # Enumerate the prefixes ordered by the number of items they have.
+    # Go from most items to least items.
+    if len(prefixes) > 0:
+      actor_inventory_string += ' In addition, you are wearing or otherwise carrying '
+      first = True
+
+      #for prefix in sorted(prefixes, key=lambda prefix: len(prefixes[prefix]), reverse=True):
+      for i, prefix in enumerate(sorted(prefixes, key=lambda prefix: len(prefixes[prefix]), reverse=True)):
+        items_remaining -= 1
+        
+        if first:
+          first = False
+        else:
+          if items_remaining < 0:
+            break
+          elif items_remaining == 0 or i == len(prefixes) - 1:
+            actor_inventory_string += ', and '
+          else:
+            actor_inventory_string += ', '
+
+        number_of_items_in_set = len(prefixes[prefix])
+
+        # Figure out the appropriate prefix (a couple of, a set of, a complete set of)
+        set_descriptor = ''
+        
+        example_item_name = prefixes[prefix][0]
+        example_item_count = input_json["actor_inventory"]["items"][example_item_name]
+        example_item_count = int(example_item_count)
+        
+        if number_of_items_in_set == 1:
+          # This may not be a set of items, but there may be more than one in this stack.
+          if example_item_count == 1:
+            set_descriptor = 'a'
+          elif example_item_count == 2:
+            set_descriptor = 'two'
+          elif example_item_count < 10:
+            set_descriptor = 'a few'
+          else:
+            set_descriptor = 'a stack of'
+        elif number_of_items_in_set == 2:
+          set_descriptor = 'a couple pieces of'
+        elif number_of_items_in_set < 7:
+          set_descriptor = 'a set of'
+        else:
+          set_descriptor = 'a complete set of'
+        
+        # The shared prefix
+        #actor_inventory_string += f'{set_descriptor} {prefix}'
+
+        category = ''
+        # Figure out the set description, armor/clothing/weapons/potions
+        for item_name in prefixes[prefix]:
+          # Common/Extravagent Clothing
+          if (item_name.endswith("Shirt") 
+          or item_name.endswith("Shoes") 
+          or item_name.endswith("Pants")
+          or item_name.endswith("Ring")
+          or item_name.endswith("Belt")
+          or item_name.endswith("Amulet")
+          or item_name.endswith("Glove")
+          or item_name.endswith("Skirt")
+          or item_name.endswith("Robe")):
+            category = 'clothing'
+
+            # Robes are a special subset of clothing, check everything in the set to see if it's a robe.
+            if any(other_item_name.endswith("Robe") for other_item_name in prefixes[prefix]):
+              category = 'robes'
+              break
+            break
+          
+          # Armor
+          if (item_name.endswith("Cuirass")
+          or item_name.endswith("Boots")
+          or item_name.endswith("Greaves")
+          or item_name.endswith("Shield")
+          or item_name.endswith("Gauntlets")
+          or item_name.endswith("Helm")
+          or item_name.endswith("Bracer")
+          or item_name.endswith("Pauldron")):
+            category = 'armor'
+            break
+
+          # Weapons
+          if (item_name.endswith("Bow")
+          or item_name.endswith("Staff")
+          or item_name.endswith("Shortsword")
+          or item_name.endswith("Longsword")
+          or item_name.endswith("Dagger")
+          or item_name.endswith("Mace")
+          or item_name.endswith("Axe")
+          or item_name.endswith("Warhammer")
+          or item_name.endswith("Katana")
+          or item_name.endswith("Wakizashi")
+          or item_name.endswith("Tanto")):
+            category = 'weapon'
+            break
+
+          # Lockpicks
+          if (item_name.endswith("Lockpick")
+            or item_name.endswith("Probe")):
+            category = 'lockpicking equipment'
+            break
+        #else:
+          # Unknown what kind of item this is, write to stderr
+          #print(f'Unknown item type: {item_name}', file=sys.stderr)
+          #actor_inventory_string += item_name
+          #pass
+        
+        # Fixups
+        # 'a common clothing' -> 'a piece of common clothing' (correct grammar)
+        if ((category == 'clothing' or category == 'armor')
+            and number_of_items_in_set == 1):
+          set_descriptor = 'a piece of'
+        
+        # 'a steel weapon' -> 'a steel longsword weapon' (be specific if there's only one item in the set)
+        if (category == 'weapon' and number_of_items_in_set == 1):
+          prefix = prefixes[prefix][0]
+
+        # 'a Expensive robes' -> 'a set of Expensive robes'
+        if (category == 'robes' and number_of_items_in_set == 1):
+          set_descriptor = 'a set of'
+        
+        # 'a set of iron weapon' -> 'a set of iron weapons'
+        if (category == 'weapon' and number_of_items_in_set > 1):
+          category = 'weapons'
+        #if category == 'weapon':
+        #  if number_of_items_in_set == 1:
+        #    category = 'weaponry'
+        #  else:
+        #    category = 'weapons'
+        
+        # 'a guide' -> 'a guide to Balmora'
+        # If we don't know the category, but there's more to the name than just the prefix, use that.
+        if (len(category) == 0
+            and len(prefixes[prefix][0]) > len(prefix)):
+
+          if number_of_items_in_set == 1:
+            category = prefixes[prefix][0][len(prefix):]
+            category = category.strip()
+
+            if example_item_count > 1:
+              category = f'{category}s'
+          else:
+            # More than likely this is an item with a common prefix.
+            # 'a couple pieces of guides' -> 'a couple guides'
+            set_descriptor = set_descriptor.replace(' pieces of', '')
+            prefix = f'{prefix}s'
+        
+        if len(category) > 0:
+          # Only add the space if there's a category
+          category = f' {category}'
+
+        actor_inventory_string += f'{set_descriptor} {prefix}{category}'
+
+        #if items_remaining == 0:
+        #  break
+        #elif items_remaining == 1:
+        #  actor_inventory_string += ', and '
+        #else:
+        #  actor_inventory_string += ', '
+
+      if len(prefixes) > max_item_count:
+        actor_inventory_string += ', among other things'
+      actor_inventory_string += '.'
+
     # Optional interesting factoid about the player the actor may know about.
     optional_player_factoid_string = ''
 
@@ -283,7 +481,7 @@ class Model:
       player_state_string += f' {player_name}{also_string} looks like a veteran, with many scars and a hardened expression.'
 
     # Describe the player's relative strength (using HP for reference)
-    relative_strength_string = 'In terms of physical strength, if you were to fight, '
+    relative_strength_string = 'Hypothetically speaking, if you were to fight, then in terms of physical strength, '
     strength_advantage = 0 # + = player, 0 = even, - = actor
 
     if not player_in_good_health or not actor_in_good_health:
@@ -354,24 +552,23 @@ class Model:
       relative_magic_string += f" But neither of you appears well-versed in magic{either_string}."
     
     # Give an 'overall' description at the end by adding the two advantages.
-    overall_advantage_string = 'Overall, you think'
+    overall_advantage_string = 'Overall, you think to yourself that'
     overall_advantage = strength_advantage + magic_advantage
 
     if overall_advantage > 3: # 4
-      overall_advantage_string += " you should definitely avoid confrontation with this person."
+      overall_advantage_string += f" you should definitely avoid confrontation with {player_name}."
     elif overall_advantage > 1: # 2, 3
-      overall_advantage_string += " they're stronger than you. You wouldn't win a fight, if they wanted to have one."
+      overall_advantage_string += f" they're stronger than you. You wouldn't win a fight, if {player_name} wanted to have one."
     elif overall_advantage > -2: # -1, 0, 1
-      overall_advantage_string += " it would be a struggle to win in a fight against this person, if their intentions are hostile."
+      overall_advantage_string += f" it would be a struggle to win in a fight against {player_name}, if their intentions are hostile."
     elif overall_advantage > -4: # -2, -3
-      overall_advantage_string += " you shouldn't be intimidated by them."
+      overall_advantage_string += f" you shouldn't be intimidated by {player_name}."
     else: # -4
-      overall_advantage_string += " they couldn't cause you any harm. even if they tried."
+      overall_advantage_string += f" {player_name} couldn't cause you any harm. even if they tried."
 
 
     # The setup prompt for the first 'chat' message.
-    setup_prompt = f"""
-You are a role-playing game character in the world of The Elder Scrolls III: Morrowind.
+    setup_prompt = f"""You are a role-playing game character in the world of The Elder Scrolls III: Morrowind.
 
 Respond in-character using descriptive language. Don't repeat exactly word-for-word the description below.
 
@@ -380,13 +577,15 @@ Reply with dialogue only, no description of your actions should be mentioned. Do
 == Context ==
 You are a character named "{actor_name}", you are a {actor_malefemale} {actor_race} {actor_class}.{optional_actor_faction_string}{optional_actor_factoid_string}
 
+{actor_inventory_string}
+
 The player is named "{player_name}", they are a {player_malefemale} {player_race} {player_class}.{optional_player_faction_string}{optional_player_factoid_string}
 
 {actor_state_string} {player_state_string}
 
 {relative_strength_string} {relative_magic_string} {overall_advantage_string}
 
-{actor_name} and {player_name} are located in "{location}". {player_name} greets your character, {actor_name}.
+{actor_name} and {player_name} are located in "{location}". {player_name} greets you.
 """
 
     # The messages from the in-game conversation.
