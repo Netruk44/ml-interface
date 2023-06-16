@@ -49,7 +49,7 @@ if TRACING:
 class Model:
   def __init__(self,
     model_name = "gpt-3.5-turbo",
-    temperature = 0.85, # Default: 0.7, which makes most NPCs sound like the same person with a different background.
+    temperature = 1.0,
     ):
     openai.api_key = OPENAI_API_KEY
     self.model_name = model_name
