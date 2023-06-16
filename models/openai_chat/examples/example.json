@@ -1,31 +1,59 @@
 {
-  "prompt": "Have you told them?",
-  "actor": "Eldafire",
-  "actor_class": "Commoner",
-  "actor_race": "High Elf",
-  "actor_faction": "",
-  "actor_faction_rank": "-1",
+  "prompt": "little advice",
+  "actor": "Mervs Uvayn",
+  "actor_is_female": "0",
+  "actor_class": "Agent",
+  "actor_race": "Dark Elf",
+  "actor_faction": "Hlaalu",
+  "actor_faction_rank": "3",
+  "actor_current_health": "97",
+  "actor_current_magicka": "104",
+  "actor_current_fatigue": "226",
+  "actor_max_health": "97",
+  "actor_max_magicka": "104",
+  "actor_max_fatigue": "226",
+  "actor_level": "12",
   "actor_disposition": "40",
-  "actor_reputation": "0",
+  "actor_reputation": "8",
+  "actor_inventory": {
+      "gold": "12",
+      "store_gold": "0",
+      "items": {
+          "Netch Leather Boots": "1",
+          "Netch Leather Cuirass": "1",
+          "Common Shirt": "1",
+          "Common Shoes": "1",
+          "Common Pants": "1",
+          "Silver Dagger": "1"
+      }
+  },
   "player_name": "Hamvir",
+  "player_is_female": "0",
   "player_class": "barbarian",
   "player_race": "nord",
+  "player_current_health": "55",
+  "player_current_magicka": "30",
+  "player_current_fatigue": "24.5322",
+  "player_max_health": "55",
+  "player_max_magicka": "30",
+  "player_max_fatigue": "180",
+  "player_level": "1",
   "player_reputation": "0",
   "player_bounty": "0",
   "player_factions": {},
-  "location": "Seyda Neen",
+  "location": "Balmora, Hlaalu Council Manor",
   "history": [
-    {
-      "text": "I haven't seen your Nord face before. Would you like a little advice? Or are you looking for someone in particular?",
-      "who": "actor"
-    },
-    {
-      "text": "little advice",
-      "who": "player"
-    },
-    {
-      "text": "You look like you can take care of yourself. Then why don't you do something about those smugglers in Addamasartus cave? It's right over there near the silt strider port. Yet these guards! Look at them. Just strutting around. Someone must have paid them to ignore the smuggling going on here.",
-      "who": "actor"
-    }
+      {
+          "text": "Well, now, Hamvir. You're back again. And what can I do for you this time? Can I interest an outlander like you in a little Morrowind lore?",
+          "who": "actor"
+      },
+      {
+          "text": "Morrowind lore",
+          "who": "player"
+      },
+      {
+          "text": "Weapons are less effective as they wear out. Eventually they break, and are useless until you repair them. A worn weapon does only part of the damage it should do. Learn to repair your weapons, or pay a smith to do it.",
+          "who": "actor"
+      }
   ]
 }

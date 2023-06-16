@@ -1,39 +1,65 @@
 {
-  "prompt": "Which is your favorite?",
-  "actor": "Vodunius Nuccius",
-  "actor_class": "Commoner",
-  "actor_race": "Imperial",
+  "prompt": "Your background",
+  "actor": "Ra'Virr",
+  "actor_is_female": "0",
+  "actor_class": "Trader Service",
+  "actor_race": "Khajiit",
   "actor_faction": "",
   "actor_faction_rank": "-1",
+  "actor_current_health": "64",
+  "actor_current_magicka": "92",
+  "actor_current_fatigue": "182",
+  "actor_max_health": "64",
+  "actor_max_magicka": "92",
+  "actor_max_fatigue": "182",
+  "actor_level": "5",
   "actor_disposition": "40",
   "actor_reputation": "0",
+  "actor_inventory": {
+      "gold": "0",
+      "store_gold": "200",
+      "items": {
+          "Cloth Right Bracer": "1",
+          "Cloth Left Bracer": "1",
+          "Netch Leather Boots": "1",
+          "Netch Leather Cuirass": "1",
+          "Common Shirt": "1",
+          "Common Shoes": "1",
+          "Common Pants": "1",
+          "Journeyman's Lockpick": "5",
+          "Apprentice's Lockpick": "10",
+          "Journeyman's Probe": "5",
+          "Apprentice's Probe": "10",
+          "Chitin Shortsword": "1"
+      }
+  },
   "player_name": "Hamvir",
+  "player_is_female": "0",
   "player_class": "barbarian",
   "player_race": "nord",
+  "player_current_health": "55",
+  "player_current_magicka": "30",
+  "player_current_fatigue": "130.139",
+  "player_max_health": "55",
+  "player_max_magicka": "30",
+  "player_max_fatigue": "180",
+  "player_level": "1",
   "player_reputation": "0",
   "player_bounty": "0",
   "player_factions": {},
-  "location": "Seyda Neen",
+  "location": "Balmora, Ra'Virr: Trader",
   "history": [
-    {
-      "text": "Yes? What do you want? If you're looking to get out of Seyda Neen, I'll be happy to give you a little advice.",
-      "who": "actor"
-    },
-    {
-      "text": "specific place",
-      "who": "player"
-    },
-    {
-      "text": "Not much here. Arrille's Tradehouse, the Census and Excise offices -- that's the Coast Guard, too -- and a lighthouse. And that's it. Silt strider service goes to Vivec, Balmora, Gnisis, and Suran. The road goes north past Pelagiad to Balmora, and east to Vivec, and southeast to Ebonheart.",
-      "who": "actor"
-    },
-    {
-      "text": "little advice",
-      "who": "player"
-    },
-    {
-      "text": "New here? Take the silt strider to Vivec or Balmora. Fast and cheap. No trouble with wild animals. And smugglers. And bandits. And outlaws. Go see Darvame Hleran over at the strider port, over the bridge and east along the water. And tell her Vodunius Nuccius sent you.",
-      "who": "actor"
-    }
+      {
+          "text": "Ra'Virr knows why you are here. You want to buy Ra'Virr's famous Daedric weapons.",
+          "who": "actor"
+      },
+      {
+          "text": "Daedric",
+          "who": "player"
+      },
+      {
+          "text": "What? You say these are not Daedric weapons? No, you are right, but Ra'Virr is no liar. When you wish it, Ra'Virr's Fiend, Demon, and Devil weapons will be as sharp as fine Daedric and as light as a netch air sac. The magic lasts a short time, but long enough to punch through the toughest armor. Ra'Virr buys them direct from the Telvanni. You'll not find any cheaper in all Balmora.",
+          "who": "actor"
+      }
   ]
 }
