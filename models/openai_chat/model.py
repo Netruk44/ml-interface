@@ -567,50 +567,63 @@ class Model:
     else: # -4
       overall_advantage_string += f" {player_name} couldn't cause you any harm. even if they tried."
 
-
-    # The setup prompt for the first 'chat' message.
-    setup_prompt = f"""You are a role-playing game character in the world of The Elder Scrolls III: Morrowind.
-
-Respond in-character using descriptive language. Don't repeat exactly word-for-word the description below.
-
-Reply with dialogue only, no description of your actions should be mentioned. Don't quote the dialogue, your response should be in first-person.
-
-== Context ==
-You are a character named "{actor_name}", you are a {actor_malefemale} {actor_race} {actor_class}.{optional_actor_faction_string}{optional_actor_factoid_string}
-
-{actor_inventory_string}
-
-The player is named "{player_name}", they are a {player_malefemale} {player_race} {player_class}.{optional_player_faction_string}{optional_player_factoid_string}
-
-{actor_state_string} {player_state_string}
-
-{relative_strength_string} {relative_magic_string} {overall_advantage_string}
-
-{actor_name} and {player_name} are located in "{location}". {player_name} greets you.
-"""
-
     # The messages from the in-game conversation.
+    # TODO: Support 'system' messages from the game, such as '<X> was removed from your inventory.'
+    # TODO: Only take the last N (2/4/10?) messages
+    #   TODO: If there are removed messages, prepend a system message with something like "You and player_name talk for a <bit|while|long time>, with the conversation currently at..."
+    #   TODO: Attempt: Create a model that summarizes the removed messages, and add that summary to the system message.
     existing_messages = [{
       "role": "assistant" if message["who"] == "actor" else "user",
       "content": message["text"]
     } for message in input_json["history"]]
 
     # The prompt that the player entered, to be answered by the AI.
-    original_player_prompt = input_json["prompt"]
+    player_prompt = input_json["prompt"]
 
     # Add information about the actor's current disposition towards the player.
     # Scale from 1-100 to a 1-10 scale
     #   Theory: text model will be able to more easily intuit a single digit than a two digit number.
     #   Context: All the numbers from 1 up to like 500 are one single token to the model.
     #            It might be easier for the model to provide meaningful distinction between 10 different tokens than 100.
-    player_prompt = f'[NOTE: {actor_name}\'s current disposition towards {player_name} is {int(input_json["actor_disposition"]) // 10} / 10.]\n\n{original_player_prompt}'
+    #player_prompt = f'[NOTE: {actor_name}\'s current disposition towards {player_name} is {int(input_json["actor_disposition"]) // 10} / 10.]\n\n{original_player_prompt}'
+
+    # An optional textual description of the actor's disposition towards the player.
+    optional_disposition_message = []
+    optional_disposition_description = None
+    actor_disposition = int(input_json["actor_disposition"])
+
+    # Add a little fuzzing to the disposition check (+/- 5), to ""simulate"" micro-changes in disposition as conversation naturally progresses.
+    if actor_disposition >= 90 + (random.randint(0, 10) - 5):
+      optional_disposition_description = 'adore'
+    elif actor_disposition >= 70 + (random.randint(0, 10) - 5):
+      optional_disposition_description = 'have a positive disposition towards'
+    elif actor_disposition <= 30 + (random.randint(0, 10) - 5):
+      optional_disposition_description = 'have a negative disposition towards'
+    elif actor_disposition <= 10 + (random.randint(0, 10) - 5):
+      optional_disposition_description = 'loathe'
     
-    # The messages sent to the API
+    if optional_disposition_description:
+      optional_disposition_message.append(f'Note: As a result of previous interactions with them, you currently {optional_disposition_description} {player_name}.')
+
+    # The conversation as ChatGPT receives it.
     conversation = [
-      {"role": "system", "content": "You are a role-playing game character in the world of The Elder Scrolls III: Morrowind."},
-      {"role": "user", "content": setup_prompt},
+      # First system message, general guidance for the model.
+      {"role": "system", "content": f"You are \"{actor_name}\", a {actor_malefemale} {actor_race} {actor_class} in the world of The Elder Scrolls III: Morrowind. You should always respond in-character as \"{actor_name}\" using character-appropriate dialogue based on your character's background and personality."},
+
+      # Second system message, information about the character it is playing as.
+      {"role": "system", "content": f"{actor_name}, you are a {actor_malefemale} {actor_race} {actor_class} currently located in \"{location}\".{optional_actor_faction_string}{optional_actor_factoid_string} {actor_inventory_string} {actor_state_string}"},
+
+      # Third system message, information about the player character.
+      {"role": "system", "content": f"A {player_malefemale} {player_race} {player_class} approaches you and introduces themselves as \"{player_name}\".{optional_player_faction_string}{optional_player_factoid_string} {player_state_string}"},
+
+      # The current conversation from in-game
       *existing_messages,
+
+      # What the player entered into the text box
       {"role": "user", "content": player_prompt},
+
+      # An optional note to the model about its current disposition towards the player.
+      *optional_disposition_message,
     ]
 
     output_json = {
