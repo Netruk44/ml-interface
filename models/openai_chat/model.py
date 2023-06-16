@@ -89,15 +89,17 @@ class Model:
     actor_faction_rank = int(input_json["actor_faction_rank"])
 
     if actor_faction != '':
+      # Generic faction description string for when rank isn't set.
       optional_actor_faction_string = f' You are a member of the "{actor_faction}".'
 
+      # Replace the string entirely with a description of the faction rank
       if actor_faction_rank > -1:
         if actor_faction_rank < 4:
-          optional_actor_faction_string += ' You are a low-ranking member of your faction.'
+          optional_actor_faction_string = f' You are a low-ranking member of your faction, the "{actor_faction}".'
         elif actor_faction_rank < 7:
-          optional_actor_faction_string += ' You are a mid-ranking member of your faction. You expect to be treated with respect.'
+          optional_actor_faction_string = f' You are a mid-ranking member of your faction, the "{actor_faction}". You expect to be treated with respect.'
         else:
-          optional_actor_faction_string += ' You are a high-ranking, well-known and respected member of your faction. You are a leader and a role model to your peers.'
+          optional_actor_faction_string = f' You are a high-ranking, well-known and respected member of your faction, the "{actor_faction}". You are a leader and a role model to your peers.'
 
     # Player faction description string
     optional_player_faction_string = ''
