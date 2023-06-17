@@ -300,9 +300,6 @@ class Model:
               set_descriptor = 'a few different types of'
             else:
               set_descriptor = 'a variety of'
-        
-        # The shared prefix
-        #actor_inventory_string += f'{set_descriptor} {prefix}'
 
         category = ''
         # Figure out the set description, armor/clothing/weapons/potions
@@ -378,11 +375,7 @@ class Model:
         # 'a set of iron weapon' -> 'a set of iron weapons'
         if (category == 'weapon' and number_of_items_in_set > 1):
           category = 'weapons'
-        #if category == 'weapon':
-        #  if number_of_items_in_set == 1:
-        #    category = 'weaponry'
-        #  else:
-        #    category = 'weapons'
+          #category = 'weaponry'
         
         # 'a guide' -> 'a guide to Balmora'
         # If we don't know the category, but there's more to the name than just the prefix, use that.
@@ -406,13 +399,6 @@ class Model:
           category = f' {category}'
 
         actor_inventory_string += f'{set_descriptor} {prefix}{category}'
-
-        #if items_remaining == 0:
-        #  break
-        #elif items_remaining == 1:
-        #  actor_inventory_string += ', and '
-        #else:
-        #  actor_inventory_string += ', '
 
       if len(prefixes) > max_item_count:
         if len(prefixes) > max_item_count * 2:
@@ -534,13 +520,6 @@ class Model:
     # The prompt that the player entered, to be answered by the AI.
     player_prompt = input_json["prompt"]
 
-    # Add information about the actor's current disposition towards the player.
-    # Scale from 1-100 to a 1-10 scale
-    #   Theory: text model will be able to more easily intuit a single digit than a two digit number.
-    #   Context: All the numbers from 1 up to like 500 are one single token to the model.
-    #            It might be easier for the model to provide meaningful distinction between 10 different tokens than 100.
-    #player_prompt = f'[NOTE: {actor_name}\'s current disposition towards {player_name} is {int(input_json["actor_disposition"]) // 10} / 10.]\n\n{original_player_prompt}'
-
     # An optional textual description of the actor's disposition towards the player.
     optional_disposition_message = []
     optional_disposition_description = None
@@ -568,7 +547,7 @@ class Model:
       {"role": "system", "content": f"{actor_name}, you are a {actor_malefemale} {actor_race} {actor_class_extended} currently located in \"{location}\".{optional_actor_faction_string}{optional_actor_factoid_string} {actor_inventory_string} {actor_state_string}"},
 
       # Third system message, information about the player character.
-      {"role": "system", "content": f"A {player_malefemale} {player_race} {player_class} approaches you and introduces themselves as \"{player_name}\".{optional_player_faction_string}{optional_player_factoid_string} {player_state_string} You begin talking."},
+      {"role": "system", "content": f"A {player_malefemale} {player_race} {player_class} approaches you and introduces themself as \"{player_name}\".{optional_player_faction_string}{optional_player_factoid_string} {player_state_string} You begin talking."},
 
       # The current conversation from in-game
       *existing_messages,
