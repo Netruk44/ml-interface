@@ -598,6 +598,30 @@ class Model:
       "content": message["text"]
     } for message in input_json["history"]]
 
+    # Remove persuasion attempts and their replies from the messages.
+    # e.g. Remove both 'Admire Fail' and 'Your tone lacks sincerity.'
+    messages_to_remove = [
+      "Admire Fail",
+      "Intimidate Fail",
+      "Taunt Fail",
+      "Bribe Fail",
+      "Admire Success",
+      "Intimidate Success",
+      "Taunt Success",
+      "Bribe Success",
+    ]
+
+    removed_message = True
+
+    while removed_message:
+      removed_message = False
+
+      for i, message in enumerate(existing_messages):
+        if message["content"] in messages_to_remove:
+          del existing_messages[i:i+2]
+          removed_message = True
+          break
+
     # The prompt that the player entered, to be answered by the AI.
     player_prompt = input_json["prompt"]
 
