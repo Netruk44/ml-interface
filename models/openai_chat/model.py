@@ -22,9 +22,13 @@ import re
 # OpenAI API Key
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
+# Echo mode
+# Don't do anything, return the input json
+ECHO = False
+
 # Debug mode
-# Instead of calling the api, return the content that would have been sent to the api
-DEBUG = False
+# Instead of calling the api, return the json that would have been sent to the api
+DEBUG = True
 
 # Mock mode
 # Instead of calling the real api, return a static response
@@ -64,8 +68,20 @@ class Model:
       input_text = f.read()
     input_json = json.loads(input_text)
 
+    if ECHO:
+      return json.dumps(input_json, indent=2)
+
     location = input_json["location"]
 
+    month = input_json["month"]
+    day = input_json["day"]
+    date_string = f'{day} {month}'
+
+    hour = input_json["hour"]
+    pm = int(input_json["pm"]) == 1
+    am_pm_string = "p.m." if pm else "a.m."
+    time_string = f'{hour} {am_pm_string}'
+    
     actor_name = input_json["actor"]
     player_name = input_json["player_name"]
 
@@ -544,7 +560,7 @@ class Model:
       {"role": "system", "content": f"You are \"{actor_name}\", a {actor_malefemale} {actor_race} {actor_class} in the world of The Elder Scrolls III: Morrowind. You should always respond in-character as \"{actor_name}\" using character-appropriate dialogue based on your character's background and personality."},
 
       # Second system message, information about the character it is playing as.
-      {"role": "system", "content": f"{actor_name}, you are a {actor_malefemale} {actor_race} {actor_class_extended} currently located in \"{location}\".{optional_actor_faction_string}{optional_actor_factoid_string} {actor_inventory_string} {actor_state_string}"},
+      {"role": "system", "content": f"{actor_name}, you are a {actor_malefemale} {actor_race} {actor_class_extended} currently located in \"{location}\". It is {time_string}, and the date is {date_string}.{optional_actor_faction_string}{optional_actor_factoid_string} {actor_inventory_string} {actor_state_string}"},
 
       # Third system message, information about the player character.
       {"role": "system", "content": f"A {player_malefemale} {player_race} {player_class} approaches you and introduces themself as \"{player_name}\".{optional_player_faction_string}{optional_player_factoid_string} {player_state_string} You begin talking."},
