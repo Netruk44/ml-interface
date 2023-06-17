@@ -175,12 +175,10 @@ class Model:
     actor_fatigue_percentage = actor_current_fatigue / actor_max_fatigue
     
     actor_state_string = ''
-    actor_in_good_health = True
 
     if actor_health_percentage > 0.5 and actor_magicka_percentage > 0.5 and actor_fatigue_percentage > 0.5:
       actor_state_string = "You are in good health."
     else: # At least one stat is below 50%
-      actor_in_good_health = False
       # Build up description, then wrap it in 'You are <description>.'
       if actor_health_percentage < 0.5:
         if actor_health_percentage < 0.25:
@@ -468,13 +466,10 @@ class Model:
     player_fatigue_percentage = player_current_fatigue / player_max_fatigue
     
     player_state_string = ''
-    player_in_good_health = True
 
     if player_health_percentage > 0.5 and player_magicka_percentage > 0.5 and player_fatigue_percentage > 0.5:
-      also_string = ' also' if actor_in_good_health else ''
-      player_state_string = f"{player_name}{also_string} appears in good health."
+      player_state_string = f"{player_name} appears to be in good health."
     else: # At least one stat is below 50%
-      player_in_good_health = False
       # Build up description, then wrap it in 'The player looks <description>.'
       if player_health_percentage < 0.5:
         if player_health_percentage < 0.25:
@@ -501,92 +496,6 @@ class Model:
     elif player_level > 20:
       also_string = ' also' if actor_level > 20 else ''
       player_state_string += f' {player_name}{also_string} looks like a veteran, with many scars and a hardened expression.'
-
-    # Describe the player's relative strength (using HP for reference)
-    relative_strength_string = 'Hypothetically speaking, if you were to fight, then in terms of physical strength, '
-    strength_advantage = 0 # + = player, 0 = even, - = actor
-
-    if not player_in_good_health or not actor_in_good_health:
-      relative_strength_string += 'assuming both of you were in perfect condition, '
-    
-    if player_max_health > actor_max_health * 1.25:
-      strength_advantage = 1
-      if player_max_health > actor_max_health * 1.5:
-        strength_advantage = 2
-    elif player_max_health < actor_max_health * 0.75:
-      strength_advantage = -1
-      if player_max_health < actor_max_health * 0.5:
-        strength_advantage = -2
-
-    if strength_advantage == 2:
-      relative_strength_string += f'you think {player_name} would significantly overpower you.'
-    elif strength_advantage == 1:
-      relative_strength_string += 'you think you would be at a disadvantage.'
-    elif strength_advantage == 0:
-      relative_strength_string += 'you think you would be evenly matched.'
-    elif strength_advantage == -1:
-      relative_strength_string += 'you think you would have the advantage.'
-    elif strength_advantage == -2:
-      relative_strength_string += f'you think you could easily overpower {player_name}.'
-    
-    both_are_physically_weak = player_max_health < 100.0 and actor_max_health < 100.0 and strength_advantage != 0
-    if both_are_physically_weak:
-      relative_strength_string += " But neither of you look very strong."
-    
-    # Describe the player's relative magical strength
-    magic_advantage = 0 # + = player, 0 = even, - = actor
-
-    if player_max_magicka > actor_max_magicka * 1.25:
-      magic_advantage = 1
-      if player_max_magicka > actor_max_magicka * 1.5:
-        magic_advantage = 2
-    elif player_max_magicka < actor_max_magicka * 0.75:
-      magic_advantage = -1
-      if player_max_magicka < actor_max_magicka * 0.5:
-        magic_advantage = -2
-    
-    if (magic_advantage >= 0 and strength_advantage < 0) or (magic_advantage < 0 and strength_advantage >= 0):
-      # The player is better at magic and the actor is better at strength or vice versa
-      relative_magic_string = 'However, in terms of magical strength, '
-    else:
-      # Either the player or actor is always better, or they're both the same.
-      relative_magic_string = 'And in terms of magical strength, '
-    
-    #also_string = ' also' if ((magic_advantage > 0 and strength_advantage > 0) or (magic_advantage < 0 and strength_advantage < 0)) else ''
-    also_string = ' also' if magic_advantage == strength_advantage else ''
-    if magic_advantage == 2:
-      relative_magic_string += f'you{also_string} think {player_name} would significantly overpower you.'
-    elif magic_advantage == 1:
-      relative_magic_string += f'you{also_string} think you would be at a disadvantage.'
-    elif magic_advantage == 0:
-      relative_magic_string += f'you{also_string} think you would be evenly matched.'
-    elif magic_advantage == -1:
-      relative_magic_string += f'you{also_string} think you would have the advantage.'
-    elif magic_advantage == -2:
-      relative_magic_string += f'you{also_string} think you could easily overpower {player_name}.'
-    
-    if player_max_magicka < 100.0 and actor_max_magicka < 100.0 and magic_advantage != 0:
-      # If everyone is bad at magic AND strength, add 'either' so the repetition doesn't sound as bad.
-      # e.g.
-      # "In terms of physical strength, you think the player would significantly overpower you. But neither of you look very strong. 
-      #  In terms of magical strength, you think you could easily overpower the player. But neither of you appears well-versed in magic, either."
-      either_string = ', either' if both_are_physically_weak else ''
-      relative_magic_string += f" But neither of you appears well-versed in magic{either_string}."
-    
-    # Give an 'overall' description at the end by adding the two advantages.
-    overall_advantage_string = 'Overall, you think to yourself that'
-    overall_advantage = strength_advantage + magic_advantage
-
-    if overall_advantage > 3: # 4
-      overall_advantage_string += f" you should definitely avoid confrontation with {player_name}."
-    elif overall_advantage > 1: # 2, 3
-      overall_advantage_string += f" they're stronger than you. You wouldn't win a fight, if {player_name} wanted to have one."
-    elif overall_advantage > -2: # -1, 0, 1
-      overall_advantage_string += f" it would be a struggle to win in a fight against {player_name}, if their intentions are hostile."
-    elif overall_advantage > -4: # -2, -3
-      overall_advantage_string += f" you shouldn't be intimidated by {player_name}."
-    else: # -4
-      overall_advantage_string += f" {player_name} couldn't cause you any harm. even if they tried."
 
     # The messages from the in-game conversation.
     # TODO: Support 'system' messages from the game, such as '<X> was removed from your inventory.'
@@ -718,3 +627,116 @@ class Model:
     # Sometimes the model likes to encase the response in quotes, which is incorrect.
     text = text.strip('"')
     return text
+
+  def get_relative_strength(self, input_json):
+    player_level = int(input_json["player_level"])
+    player_current_health = float(input_json["player_current_health"])
+    player_current_magicka = float(input_json["player_current_magicka"])
+    player_current_fatigue = float(input_json["player_current_fatigue"])
+    player_max_health = float(input_json["player_max_health"])
+    player_max_magicka = float(input_json["player_max_magicka"])
+    player_max_fatigue = float(input_json["player_max_fatigue"])
+    player_health_percentage = player_current_health / player_max_health
+    player_magicka_percentage = player_current_magicka / player_max_magicka
+    player_fatigue_percentage = player_current_fatigue / player_max_fatigue
+
+    actor_current_health = float(input_json["actor_current_health"])
+    actor_current_magicka = float(input_json["actor_current_magicka"])
+    actor_current_fatigue = float(input_json["actor_current_fatigue"])
+    actor_max_health = float(input_json["actor_max_health"])
+    actor_max_magicka = float(input_json["actor_max_magicka"])
+    actor_max_fatigue = float(input_json["actor_max_fatigue"])
+    actor_health_percentage = actor_current_health / actor_max_health
+    actor_magicka_percentage = actor_current_magicka / actor_max_magicka
+    actor_fatigue_percentage = actor_current_fatigue / actor_max_fatigue
+
+    player_in_good_health = player_health_percentage >= 0.5 and player_magicka_percentage >= 0.5 and player_fatigue_percentage >= 0.5
+    actor_in_good_health = actor_health_percentage >= 0.5 and actor_magicka_percentage >= 0.5 and actor_fatigue_percentage >= 0.5
+
+    # Describe the player's relative strength (using HP for reference)
+    relative_strength_string = 'Hypothetically speaking, if you were to fight, then in terms of physical strength, '
+    strength_advantage = 0 # + = player, 0 = even, - = actor
+
+    if not player_in_good_health or not actor_in_good_health:
+      relative_strength_string += 'assuming both of you were in perfect condition, '
+    
+    if player_max_health > actor_max_health * 1.25:
+      strength_advantage = 1
+      if player_max_health > actor_max_health * 1.5:
+        strength_advantage = 2
+    elif player_max_health < actor_max_health * 0.75:
+      strength_advantage = -1
+      if player_max_health < actor_max_health * 0.5:
+        strength_advantage = -2
+
+    if strength_advantage == 2:
+      relative_strength_string += f'you think {player_name} would significantly overpower you.'
+    elif strength_advantage == 1:
+      relative_strength_string += 'you think you would be at a disadvantage.'
+    elif strength_advantage == 0:
+      relative_strength_string += 'you think you would be evenly matched.'
+    elif strength_advantage == -1:
+      relative_strength_string += 'you think you would have the advantage.'
+    elif strength_advantage == -2:
+      relative_strength_string += f'you think you could easily overpower {player_name}.'
+    
+    both_are_physically_weak = player_max_health < 100.0 and actor_max_health < 100.0 and strength_advantage != 0
+    if both_are_physically_weak:
+      relative_strength_string += " But neither of you look very strong."
+    
+    # Describe the player's relative magical strength
+    magic_advantage = 0 # + = player, 0 = even, - = actor
+
+    if player_max_magicka > actor_max_magicka * 1.25:
+      magic_advantage = 1
+      if player_max_magicka > actor_max_magicka * 1.5:
+        magic_advantage = 2
+    elif player_max_magicka < actor_max_magicka * 0.75:
+      magic_advantage = -1
+      if player_max_magicka < actor_max_magicka * 0.5:
+        magic_advantage = -2
+    
+    if (magic_advantage >= 0 and strength_advantage < 0) or (magic_advantage < 0 and strength_advantage >= 0):
+      # The player is better at magic and the actor is better at strength or vice versa
+      relative_magic_string = 'However, in terms of magical strength, '
+    else:
+      # Either the player or actor is always better, or they're both the same.
+      relative_magic_string = 'And in terms of magical strength, '
+    
+    #also_string = ' also' if ((magic_advantage > 0 and strength_advantage > 0) or (magic_advantage < 0 and strength_advantage < 0)) else ''
+    also_string = ' also' if magic_advantage == strength_advantage else ''
+    if magic_advantage == 2:
+      relative_magic_string += f'you{also_string} think {player_name} would significantly overpower you.'
+    elif magic_advantage == 1:
+      relative_magic_string += f'you{also_string} think you would be at a disadvantage.'
+    elif magic_advantage == 0:
+      relative_magic_string += f'you{also_string} think you would be evenly matched.'
+    elif magic_advantage == -1:
+      relative_magic_string += f'you{also_string} think you would have the advantage.'
+    elif magic_advantage == -2:
+      relative_magic_string += f'you{also_string} think you could easily overpower {player_name}.'
+    
+    if player_max_magicka < 100.0 and actor_max_magicka < 100.0 and magic_advantage != 0:
+      # If everyone is bad at magic AND strength, add 'either' so the repetition doesn't sound as bad.
+      # e.g.
+      # "In terms of physical strength, you think the player would significantly overpower you. But neither of you look very strong. 
+      #  In terms of magical strength, you think you could easily overpower the player. But neither of you appears well-versed in magic, either."
+      either_string = ', either' if both_are_physically_weak else ''
+      relative_magic_string += f" But neither of you appears well-versed in magic{either_string}."
+    
+    # Give an 'overall' description at the end by adding the two advantages.
+    overall_advantage_string = 'Overall, you think to yourself that'
+    overall_advantage = strength_advantage + magic_advantage
+
+    if overall_advantage > 3: # 4
+      overall_advantage_string += f" you should definitely avoid confrontation with {player_name}."
+    elif overall_advantage > 1: # 2, 3
+      overall_advantage_string += f" they're stronger than you. You wouldn't win a fight, if {player_name} wanted to have one."
+    elif overall_advantage > -2: # -1, 0, 1
+      overall_advantage_string += f" it would be a struggle to win in a fight against {player_name}, if their intentions are hostile."
+    elif overall_advantage > -4: # -2, -3
+      overall_advantage_string += f" you shouldn't be intimidated by {player_name}."
+    else: # -4
+      overall_advantage_string += f" {player_name} couldn't cause you any harm. even if they tried."
+    
+    return f"{relative_strength_string} {relative_magic_string} {overall_advantage_string}"
