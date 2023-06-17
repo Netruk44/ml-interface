@@ -28,7 +28,7 @@ ECHO = False
 
 # Debug mode
 # Instead of calling the api, return the json that would have been sent to the api
-DEBUG = True
+DEBUG = False
 
 # Mock mode
 # Instead of calling the real api, return a static response
@@ -390,6 +390,8 @@ class Model:
         
         # 'a set of iron weapon' -> 'a set of iron weapons'
         if (category == 'weapon' and number_of_items_in_set > 1):
+          # 'a couple pieces of iron weapons' -> 'a couple iron weapons'
+          set_descriptor = set_descriptor.replace(' pieces of', '')
           category = 'weapons'
           #category = 'weaponry'
         
