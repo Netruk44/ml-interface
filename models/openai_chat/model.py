@@ -554,7 +554,7 @@ class Model:
       optional_disposition_description = 'loathe'
     
     if optional_disposition_description:
-      optional_disposition_message.append(f'Note: As a result of previous interactions with them, you currently {optional_disposition_description} {player_name}.')
+      optional_disposition_message.append({"role": "system", "content": f'Note: As a result of previous interactions with them, you currently {optional_disposition_description} {player_name}.'})
 
     # The conversation as ChatGPT receives it.
     conversation = [
