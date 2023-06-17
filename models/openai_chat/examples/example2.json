@@ -1,65 +1,74 @@
 {
-  "prompt": "Your background",
-  "actor": "Ra'Virr",
-  "actor_is_female": "0",
-  "actor_class": "Trader Service",
-  "actor_race": "Khajiit",
-  "actor_faction": "",
-  "actor_faction_rank": "-1",
-  "actor_current_health": "64",
-  "actor_current_magicka": "92",
-  "actor_current_fatigue": "182",
-  "actor_max_health": "64",
-  "actor_max_magicka": "92",
-  "actor_max_fatigue": "182",
-  "actor_level": "5",
-  "actor_disposition": "40",
-  "actor_reputation": "0",
-  "actor_inventory": {
-      "gold": "0",
-      "store_gold": "200",
-      "items": {
-          "Cloth Right Bracer": "1",
-          "Cloth Left Bracer": "1",
-          "Netch Leather Boots": "1",
-          "Netch Leather Cuirass": "1",
-          "Common Shirt": "1",
-          "Common Shoes": "1",
-          "Common Pants": "1",
-          "Journeyman's Lockpick": "5",
-          "Apprentice's Lockpick": "10",
-          "Journeyman's Probe": "5",
-          "Apprentice's Probe": "10",
-          "Chitin Shortsword": "1"
-      }
-  },
-  "player_name": "Hamvir",
-  "player_is_female": "0",
-  "player_class": "barbarian",
-  "player_race": "nord",
-  "player_current_health": "55",
-  "player_current_magicka": "30",
-  "player_current_fatigue": "130.139",
-  "player_max_health": "55",
-  "player_max_magicka": "30",
-  "player_max_fatigue": "180",
-  "player_level": "1",
-  "player_reputation": "0",
-  "player_bounty": "0",
-  "player_factions": {},
-  "location": "Balmora, Ra'Virr: Trader",
-  "history": [
-      {
-          "text": "Ra'Virr knows why you are here. You want to buy Ra'Virr's famous Daedric weapons.",
-          "who": "actor"
-      },
-      {
-          "text": "Daedric",
-          "who": "player"
-      },
-      {
-          "text": "What? You say these are not Daedric weapons? No, you are right, but Ra'Virr is no liar. When you wish it, Ra'Virr's Fiend, Demon, and Devil weapons will be as sharp as fine Daedric and as light as a netch air sac. The magic lasts a short time, but long enough to punch through the toughest armor. Ra'Virr buys them direct from the Telvanni. You'll not find any cheaper in all Balmora.",
-          "who": "actor"
-      }
-  ]
+    "prompt": "Do you miss Elsweyr?",
+    "actor": "Ra'Virr",
+    "actor_is_female": "0",
+    "actor_class": "Trader Service",
+    "actor_race": "Khajiit",
+    "actor_faction": "",
+    "actor_faction_rank": "-1",
+    "actor_current_health": "64",
+    "actor_current_magicka": "92",
+    "actor_current_fatigue": "182",
+    "actor_max_health": "64",
+    "actor_max_magicka": "92",
+    "actor_max_fatigue": "182",
+    "actor_level": "5",
+    "actor_disposition": "67",
+    "actor_reputation": "0",
+    "actor_inventory": {
+        "gold": "0",
+        "store_gold": "600",
+        "items": {
+            "Common Belt": "1",
+            "Common Shirt": "1",
+            "Common Pants": "1",
+            "Ceramic Bowl": "2",
+            "Devil Spear": "1",
+            "Steel Warhammer": "1",
+            "Fiend Katana": "1",
+            "Fiend Tanto": "1",
+            "Demon Tanto": "1"
+        }
+    },
+    "player_name": "Corvus",
+    "player_is_female": "0",
+    "player_class": "bard",
+    "player_race": "imperial",
+    "player_current_health": "40",
+    "player_current_magicka": "50",
+    "player_current_fatigue": "112.456",
+    "player_max_health": "40",
+    "player_max_magicka": "50",
+    "player_max_fatigue": "165",
+    "player_level": "1",
+    "player_reputation": "0",
+    "player_bounty": "0",
+    "player_factions": {},
+    "location": "Balmora, Ra'Virr: Trader",
+    "month": "Last Seed",
+    "day": "16",
+    "hour": "1",
+    "pm": "1",
+    "history": [
+        {
+            "text": "Ra'Virr knows why you are here. You want to buy Ra'Virr's famous Daedric weapons.",
+            "who": "actor"
+        },
+        {
+            "text": "Daedric",
+            "who": "player"
+        },
+        {
+            "text": "What? You say these are not Daedric weapons? No, you are right, but Ra'Virr is no liar. When you wish it, Ra'Virr's Fiend, Demon, and Devil weapons will be as sharp as fine Daedric and as light as a netch air sac. The magic lasts a short time, but long enough to punch through the toughest armor. Ra'Virr buys them direct from the Telvanni. You'll not find any cheaper in all Balmora.",
+            "who": "actor"
+        },
+        {
+            "text": "Your background",
+            "who": "player"
+        },
+        {
+            "text": "Ra'Virr was born in the Elsweyr province but traveled to Morrowind to prove his trading skills. Ra'Virr is a proud Khajiit trader, known for his shrewd bargaining skills and his excellent reputation as a honest and reliable seller. Ra'Virr started as a humble street vendor in Balmora, but through hard work and astute business sense, he has managed to establish his own storefront and build his trade empire. Ra'Virr does not shy away from dirty work if necessary, as long as it is profitable. Yet Ra'Virr has a soft spot for the downtrodden and will often provide discounts and assistance to those who cannot afford to pay his asking price. ",
+            "who": "actor"
+        }
+    ]
 }
