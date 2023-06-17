@@ -38,7 +38,7 @@ TRACING_ENDPOINT = os.environ.get("TRACING_ENDPOINT")
 
 ######################### Auto-configuration
 TRACING = TRACING_ENDPOINT is not None and TRACING_ENDPOINT != ""
-TRACING = False # Manual override
+#TRACING = False # Manual override
 
 if TRACING:
   from azure.storage.queue import QueueClient, BinaryBase64EncodePolicy
