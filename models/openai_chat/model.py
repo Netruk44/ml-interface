@@ -75,9 +75,10 @@ class Model:
     player_class = input_json["player_class"]
     # Touch-up the actor's class to rephrase '<class> Service' to something that ChatGPT understands better
     actor_class = input_json['actor_class']
+    actor_class_extended = actor_class
     if actor_class.endswith(' Service'):
         actor_class = actor_class[:-len(' Service')]
-        actor_class = f'{actor_class} who offers their services to others'
+        actor_class_extended = f'{actor_class} who offers their services to others'
     
     # Male/female text for actor and player
     actor_malefemale = 'male' if int(input_json['actor_is_female']) == 0 else 'female'
@@ -159,7 +160,7 @@ class Model:
       else:
         optional_actor_factoid_string = " You're a legend. You've impacted countless people throughout your lifespan, and as a result everybody knows your name."
     else:
-      optional_actor_factoid_string = " The character you're playing as doesn't have any reputation. Feel free to make up a simple backstory for them."
+      optional_actor_factoid_string = " You don't have much of a reputation. Feel free to make up a simple backstory for yourself."
 
     # Description of the actor's state (health, magic, fatigue)
     actor_level = int(input_json["actor_level"])
@@ -268,6 +269,11 @@ class Model:
 
         # Figure out the appropriate prefix (a couple of, a set of, a complete set of)
         set_descriptor = ''
+
+        is_group_a_set = True
+
+        if prefix == 'Scroll' or prefix == 'Potion':
+          is_group_a_set = False
         
         if number_of_items_in_set == 1:
           # This may not be a set of items, but there may be more than one in this stack.
@@ -279,12 +285,23 @@ class Model:
             set_descriptor = 'a few'
           else:
             set_descriptor = 'a stack of'
-        elif number_of_items_in_set == 2:
-          set_descriptor = 'a couple pieces of'
-        elif number_of_items_in_set < 7:
-          set_descriptor = 'a set of'
         else:
-          set_descriptor = 'a complete set of'
+          if is_group_a_set:
+            # Sets of armor, weapons, etc.
+            if number_of_items_in_set == 2:
+              set_descriptor = 'a couple pieces of'
+            elif number_of_items_in_set < 7:
+              set_descriptor = 'a set of'
+            else:
+              set_descriptor = 'a complete set of'
+          else:
+            # Scrolls, potions, etc.
+            if number_of_items_in_set == 2:
+              set_descriptor = 'a couple'
+            elif number_of_items_in_set < 7:
+              set_descriptor = 'a few different types of'
+            else:
+              set_descriptor = 'a variety of'
         
         # The shared prefix
         #actor_inventory_string += f'{set_descriptor} {prefix}'
@@ -400,7 +417,11 @@ class Model:
         #  actor_inventory_string += ', '
 
       if len(prefixes) > max_item_count:
-        actor_inventory_string += ', among other things'
+        if len(prefixes) > max_item_count * 2:
+          many_items_string = ' many'
+        else:
+          many_items_string = ''
+        actor_inventory_string += f', among{many_items_string} other things'
       actor_inventory_string += '.'
 
     # Optional interesting factoid about the player the actor may know about.
@@ -611,10 +632,10 @@ class Model:
       {"role": "system", "content": f"You are \"{actor_name}\", a {actor_malefemale} {actor_race} {actor_class} in the world of The Elder Scrolls III: Morrowind. You should always respond in-character as \"{actor_name}\" using character-appropriate dialogue based on your character's background and personality."},
 
       # Second system message, information about the character it is playing as.
-      {"role": "system", "content": f"{actor_name}, you are a {actor_malefemale} {actor_race} {actor_class} currently located in \"{location}\".{optional_actor_faction_string}{optional_actor_factoid_string} {actor_inventory_string} {actor_state_string}"},
+      {"role": "system", "content": f"{actor_name}, you are a {actor_malefemale} {actor_race} {actor_class_extended} currently located in \"{location}\".{optional_actor_faction_string}{optional_actor_factoid_string} {actor_inventory_string} {actor_state_string}"},
 
       # Third system message, information about the player character.
-      {"role": "system", "content": f"A {player_malefemale} {player_race} {player_class} approaches you and introduces themselves as \"{player_name}\".{optional_player_faction_string}{optional_player_factoid_string} {player_state_string}"},
+      {"role": "system", "content": f"A {player_malefemale} {player_race} {player_class} approaches you and introduces themselves as \"{player_name}\".{optional_player_faction_string}{optional_player_factoid_string} {player_state_string} You begin talking."},
 
       # The current conversation from in-game
       *existing_messages,
